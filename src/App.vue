@@ -1,8 +1,9 @@
 <template>
   <div id="app" class="contain-fluid">
-    <Header/>
+    <Header :point="headerClickCount" :msg="'abcdefg'" @click_count="clickCountHandler" />
     <Toolbars/>
     <router-view/>
+    <h2> Header Click Count: {{headerClickCount}} </h2>
   </div>
 </template>
 
@@ -29,5 +30,10 @@ import Toolbars from '@/components/Toolbars.vue'
   }
 })
 export default class App extends Vue {
+  private headerClickCount: number = 0;
+  public clickCountHandler (val: number) {
+    this.headerClickCount = val
+    console.log('the emitted value is: ' + val)
+  }
 }
 </script>
