@@ -9,4 +9,4 @@ jobs:
 
     steps:
     - name: Deploy to vuepress
-    - uses: grasilife/github-pages-deploy-action@v1.2
+      uses: grasilife/github-pages-deploy-action@v1.2
