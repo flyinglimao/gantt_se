@@ -2,7 +2,7 @@
   <div id="app" class="contain-fluid">
     <Header/>
     <Toolbars/>
-    <router-view/>
+    <router-view class="main"/>
   </div>
 </template>
 
@@ -12,8 +12,12 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  background: rgba(216, 216, 216, .35);
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.main {
+  flex-grow: 1;
 }
 </style>
 

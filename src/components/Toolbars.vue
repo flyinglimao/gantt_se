@@ -1,10 +1,10 @@
 <template>
-    <ul class="nav">
+    <ul class="nav border-top border-bottom">
         <li class="nav-item">
-            <a class="nav-link active" href="#">Task List</a>
+            <router-link class="nav-link" to="task" active-class="active">Task List</router-link>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Gantt Chart</a>
+            <router-link class="nav-link" to="gantt" active-class="active">Gantt Chart</router-link>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Save</a>
@@ -18,11 +18,13 @@
 <style lang="scss" scoped>
 .nav {
     font-size: 0.8rem;
-    background: rgba(192, 192, 192, .65);
     a {
         color: black;
         &:hover {
             background: rgba(192, 192, 192, .35);
+        }
+        &.active {
+            background: rgba(192, 192, 192, .15);
         }
     }
 }
