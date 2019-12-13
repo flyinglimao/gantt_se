@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <h5>Copyright view</h5>
   </div>
 </template>
 
@@ -11,7 +12,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class TaskList extends Vue {
+export default class Copyright extends Vue {
   @Prop() private msg!: string;
 }
 </script>

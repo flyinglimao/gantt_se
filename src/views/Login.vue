@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h5>Contact view</h5>
+    <h5>Login view</h5>
   </div>
 </template>
 
@@ -12,7 +12,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class Contact extends Vue {
+export default class Login extends Vue {
   @Prop() private msg!: string;
 }
 </script>
