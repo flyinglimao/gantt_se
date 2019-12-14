@@ -10,6 +10,7 @@
             <th>#</th>
             <th>State</th>
             <th class="col">Title</th>
+            <th style="min-width: 5em">Manager</th>
             <th style="min-width: 5em">Type</th>
             <th style="min-width: 8em">Start</th>
             <th style="min-width: 8em">End</th>
@@ -17,31 +18,38 @@
             <th style="min-width: 3em">Progress</th>
             <th>Delete</th>
           </thead>
-          <tbody @dblclick="editingCallback($event)">
+          <tbody @dblclick="editingCallback($event)"
+                 @focusout="finishCallback($event)">
             <tr v-for="(item,index) in argtaskList" :key="index">
               <td class="col-dropdown"><span class="arrow"><span></span><span></span></span></td>
               <td class="col-state"><span class="state-good">●</span></td>
               <td class="col-title">
-                <input @blur="finishCallback($event)" style="text-align: center;width: 100%" v-model="item.title" type="text" id="title" >
+                <input  style="text-align: center;width: 100%" v-model="item.title" type="text" id="title" >
                 <label for="title" style="text-align: center;width: 100%">{{item.title}}</label>
               </td>
+              <td class="col-manager">
+                <select class="selectpicker" :id="'selectpicker'+index" multiple data-live-search="true" @change="updateManagers($event, index)">
+                  <option v-for="(member ,index) in (projectInfo.teamMember)"
+                  :value="member" :key="index"  :selected="item.managers.includes(member)">{{member}}</option>
+                </select>
+              </td>
               <td class="col-type">
-                <input @blur="finishCallback($event)" v-model="item.type" type="text" id="type" >
+                <input  v-model="item.type" type="text" id="type" >
                 <label for="type" >{{item.type}}</label>
               </td>
               <td class="col-start">
-                <input @blur="finishCallback($event)" v-model="item.start" type="text" id="start" >
+                <input  v-model="item.start" type="text" id="start" >
                 <label for="start">{{item.start}}</label>
               </td>
               <td class="col-end">
-                <input @blur="finishCallback($event)" v-model="item.end" type="text" id="end">
+                <input  v-model="item.end" type="text" id="end">
                 <label for="end">{{item.end}}</label>
               </td>
               <td class="col-day">
                 {{item.day}} days
               </td>
               <td class="col-progress">
-                <input @focusout="finishCallback($event)" v-model="item.progress" type="text" id="progress">
+                <input  v-model="item.progress" type="text" id="progress">
                 <label for="progress">{{item.progress}}%</label>
               </td>
               <td class="col-del">
@@ -191,11 +199,19 @@ td.editing  {
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import store from '../store/index'
+import { mount } from '@vue/test-utils'
+
+let $: any = jQuery
 @Component
 export default class TaskList extends Vue {
   @Prop() private msg!: string;
   private taskList: any[] = store.state.taskList;
   searchString: string = ''
+  projectInfo = store.state.projectInfo
+
+  mounted () {
+    $('.selectpicker').selectpicker('refresh')
+  }
 
   get argtaskList () {
     let target: any[] = this.taskList
@@ -220,16 +236,27 @@ export default class TaskList extends Vue {
 
   editingCallback (e: Event) {
     let ref = e.target as HTMLElement
-    let editingFlag: boolean = false
+    if (ref.classList.contains('col-day')) return
     if (ref.nodeName === 'TD') {
       ref.classList.add('editing')
+
+      let inputElement = ref.querySelector('input') as HTMLElement
+      inputElement.focus()
     } else if (ref.nodeName === 'LABEL') {
       let parent = ref.parentElement as HTMLElement
       parent.classList.add('editing')
+
+      let inputElement = parent.querySelector('input') as HTMLElement
+      inputElement.focus()
     }
   }
 
-  finishCallback (e: Event, index: number) {
+  updateManagers (e: Event, index: number) {
+    let newMembers = $(('#selectpicker' + index)).val()
+    this.taskList[index].managers = newMembers
+  }
+
+  finishCallback (e: Event) {
     let target = e.target as HTMLElement
     let parent = target.parentElement as HTMLElement
     parent.classList.remove('editing')
@@ -249,6 +276,7 @@ export default class TaskList extends Vue {
       start: daystring,
       end: daystring,
       time: 0,
+      managers: [],
       progress: 0
     }
     this.taskList.push(task)
