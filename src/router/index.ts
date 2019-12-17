@@ -25,11 +25,6 @@ const routes = [
     component: Copyright
   },
   {
-    path: '/gantt',
-    name: 'gantt',
-    component: GanttChart
-  },
-  {
     path: '/contact',
     name: 'contact',
     component: Contact

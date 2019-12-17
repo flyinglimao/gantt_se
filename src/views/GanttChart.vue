@@ -50,9 +50,8 @@
   }
 }
 .test-box {
-  background-color: red;
   width: 100%;
-  height: 500px;
+  height: 100%;
 }
 button {
   font-size: 1.5em; float: left;
@@ -74,6 +73,20 @@ export default class GanttChart extends Vue {
   mounted () {
     this.initialData()
     this.exampleChart()
+
+    let w = 750
+    let h = 750
+
+    let svg = d3.select('.test-box').append('svg')
+      .attr('width', w)
+      .attr('height', h)
+      .style('border', 'solid 1px black')
+
+    let newg = svg.append('g')
+    let a = (new BarChart(newg, 150, 30)).setRectProp('fill', 'green')
+    let b = (new BarChart(newg, 150, 60)).setRectProp('fill', 'blue')
+    let c = (new BarChart(newg, 150, 90)).setRectProp('fill', 'blown')
+    let d = (new BarChart(newg, 150, 120)).setRectProp('fill', 'red')
   }
 
   initialData () {
@@ -163,219 +176,194 @@ export default class GanttChart extends Vue {
   }
 
   exampleChart () {
-    let w = 750
-    let h = 450
-    let r = 120
 
-    let isXChecked = true
-    let isYChecked = true
+  }
+}
 
-    let width = 300
-    let height = 200
-    let dragbarw = 20
+class BarChart {
+  // container 高度寬度 用於邊界檢測
+  w!: number
+  h!: number
+  // 不重要
+  isXChecked!: boolean
+  isYChecked!: boolean
+  // Bar主體 高度寬度
+  width!: number
+  height!: number
+  // 輔助Bar 高度
+  dragbarw!: number
+
+  // Bar主體
+  dragrect!: any
+  // 輔助Bar 灰色區塊
+  dragbarleft!: any
+  dragbarright!: any
+
+  constructor (container: any, argX: number = -1, argY: number = -1) {
+    // container 高度寬度 用於邊界檢測
+    this.w = 750
+    this.h = 750
+    // 不重要
+    this.isXChecked = true
+    this.isYChecked = true
+    // Bar主體 高度寬度
+    this.width = 300
+    this.height = 30
+    // 輔助Bar 高度
+    this.dragbarw = 20
+    // 將Bar 放在哪一個container
+    container.data([{
+      x: argX === -1 ? this.width / 2 : argX,
+      y: argY === -1 ? this.height / 2 : argY
+    }])
 
     let drag = d3.behavior.drag()
       .origin(Object)
-      .on('drag', dragmove)
+      .on('drag', this.dragmove.bind(this))
 
     let dragright = d3.behavior.drag()
       .origin(Object)
-      .on('drag', rdragresize)
+      .on('drag', this.rdragresize.bind(this))
 
     let dragleft = d3.behavior.drag()
       .origin(Object)
-      .on('drag', ldragresize)
+      .on('drag', this.ldragresize.bind(this))
 
-    let dragtop = d3.behavior.drag()
-      .origin(Object)
-      .on('drag', tdragresize)
-
-    let dragbottom = d3.behavior.drag()
-      .origin(Object)
-      .on('drag', bdragresize)
-
-    let svg = d3.select('.test-box').append('svg')
-      .attr('width', w)
-      .attr('height', h)
-
-    let newg = svg.append('g')
-      .data([{ x: width / 2, y: height / 2 }])
-
-    let dragrect = newg.append('rect')
+    // Bar主體
+    this.dragrect = container.append('rect')
       .attr('id', 'active')
       .attr('x', function (d: any) { return d.x })
       .attr('y', function (d: any) { return d.y })
-      .attr('height', height)
-      .attr('width', width)
+      .attr('height', this.height)
+      .attr('width', this.width)
       .attr('fill-opacity', 0.5)
       .attr('cursor', 'move')
       .call(drag)
-
-    let dragbarleft = newg.append('rect')
-      .attr('x', function (d: any) { return d.x - (dragbarw / 2) })
-      .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
-      .attr('height', height - dragbarw)
+    // Bar左邊灰色區塊
+    this.dragbarleft = container.append('rect')
+      .attr('x', (d: any) => { console.log(d); return d.x - (this.dragbarw / 2) })
+      .attr('y', (d: any) => { return d.y })
+      .attr('height', this.height)
       .attr('id', 'dragleft')
-      .attr('width', dragbarw)
+      .attr('width', this.dragbarw)
       .attr('fill', 'lightblue')
       .attr('fill-opacity', 0.5)
       .attr('cursor', 'ew-resize')
       .call(dragleft)
-
-    let dragbarright = newg.append('rect')
-      .attr('x', function (d: any) { return d.x + width - (dragbarw / 2) })
-      .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
+    // Bar右邊灰色區塊
+    this.dragbarright = container.append('rect')
+      .attr('x', (d: any) => { return d.x + this.width - (this.dragbarw / 2) })
+      .attr('y', (d: any) => { return d.y })
       .attr('id', 'dragright')
-      .attr('height', height - dragbarw)
-      .attr('width', dragbarw)
+      .attr('height', this.height)
+      .attr('width', this.dragbarw)
       .attr('fill', 'lightblue')
       .attr('fill-opacity', 0.5)
       .attr('cursor', 'ew-resize')
       .call(dragright)
+  }
 
-    let dragbartop = newg.append('rect')
-      .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-      .attr('y', function (d: any) { return d.y - (dragbarw / 2) })
-      .attr('height', dragbarw)
-      .attr('id', 'dragleft')
-      .attr('width', width - dragbarw)
-      .attr('fill', 'lightgreen')
-      .attr('fill-opacity', 0.5)
-      .attr('cursor', 'ns-resize')
-      .call(dragtop)
-
-    let dragbarbottom = newg.append('rect')
-      .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-      .attr('y', function (d: any) { return d.y + height - (dragbarw / 2) })
-      .attr('id', 'dragright')
-      .attr('height', dragbarw)
-      .attr('width', width - dragbarw)
-      .attr('fill', 'lightgreen')
-      .attr('fill-opacity', 0.5)
-      .attr('cursor', 'ns-resize')
-      .call(dragbottom)
-
-    function dragmove (d: any) {
-      if (isXChecked) {
-        dragrect
-          .attr('x', d.x = Math.max(0, Math.min(w - width, d3.event.x)))
-        dragbarleft
-          .attr('x', function (d: any) { return d.x - (dragbarw / 2) })
-        dragbarright
-          .attr('x', function (d: any) { return d.x + width - (dragbarw / 2) })
-        dragbartop
-          .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-        dragbarbottom
-          .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-      }
-      if (isYChecked) {
-        dragrect
-          .attr('y', d.y = Math.max(0, Math.min(h - height, d3.event.y)))
-        dragbarleft
-          .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
-        dragbarright
-          .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
-        dragbartop
-          .attr('y', function (d: any) { return d.y - (dragbarw / 2) })
-        dragbarbottom
-          .attr('y', function (d: any) { return d.y + height - (dragbarw / 2) })
-      }
+  // 移動Bar callback
+  private dragmove (d: any) {
+    if (this.isXChecked) {
+      this.dragrect
+        .attr('x', d.x = Math.max(0, Math.min(this.w - this.width, d3.event.x)))
+      this.dragbarleft
+        .attr('x', (d: any) => { return d.x - (this.dragbarw / 2) })
+      this.dragbarright
+        .attr('x', (d: any) => { return d.x + this.width - (this.dragbarw / 2) })
+        // dragbartop
+        //   .attr('x', (d: any) => { return d.x + (this.dragbarw / 2) })
+        // dragbarbottom
+        //   .attr('x', (d: any) => { return d.x + (this.dragbarw / 2) })
     }
-
-    function ldragresize (d: any) {
-      if (isXChecked) {
-        let oldx = d.x
-        // Max x on the right is x + width - dragbarw
-        // Max x on the left is 0 - (dragbarw/2)
-        d.x = Math.max(0, Math.min(d.x + width - (dragbarw / 2), d3.event.x))
-        width = width + (oldx - d.x)
-        dragbarleft
-          .attr('x', function (d: any) { return d.x - (dragbarw / 2) })
-
-        dragrect
-          .attr('x', function (d: any) { return d.x })
-          .attr('width', width)
-
-        dragbartop
-          .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-          .attr('width', width - dragbarw)
-        dragbarbottom
-          .attr('x', function (d: any) { return d.x + (dragbarw / 2) })
-          .attr('width', width - dragbarw)
-      }
-    }
-
-    function rdragresize (d: any) {
-      if (isXChecked) {
-        // Max x on the left is x - width
-        // Max x on the right is width of screen + (dragbarw/2)
-        let dragx = Math.max(d.x + (dragbarw / 2), Math.min(w, d.x + width + d3.event.dx))
-
-        // recalculate width
-        width = dragx - d.x
-
-        // move the right drag handle
-        dragbarright
-          .attr('x', function (d: any) { return dragx - (dragbarw / 2) })
-
-        // resize the drag rectangle
-        // as we are only resizing from the right, the x coordinate does not need to change
-        dragrect
-          .attr('width', width)
-        dragbartop
-          .attr('width', width - dragbarw)
-        dragbarbottom
-          .attr('width', width - dragbarw)
-      }
-    }
-
-    function tdragresize (d: any) {
-      if (isYChecked) {
-        let oldy = d.y
-        // Max x on the right is x + width - dragbarw
-        // Max x on the left is 0 - (dragbarw/2)
-        d.y = Math.max(0, Math.min(d.y + height - (dragbarw / 2), d3.event.y))
-        height = height + (oldy - d.y)
-        dragbartop
-          .attr('y', function (d: any) { return d.y - (dragbarw / 2) })
-
-        dragrect
-          .attr('y', function (d: any) { return d.y })
-          .attr('height', height)
-
-        dragbarleft
-          .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
-          .attr('height', height - dragbarw)
-        dragbarright
-          .attr('y', function (d: any) { return d.y + (dragbarw / 2) })
-          .attr('height', height - dragbarw)
-      }
-    }
-
-    function bdragresize (d: any, i: any) {
-      console.log(i)
-      if (isYChecked) {
-        // Max x on the left is x - width
-        // Max x on the right is width of screen + (dragbarw/2)
-        let dragy = Math.max(d.y + (dragbarw / 2), Math.min(h, d.y + height + d3.event.dy))
-
-        // recalculate width
-        height = dragy - d.y
-
-        // move the right drag handle
-        dragbarbottom
-          .attr('y', function (d: any) { return dragy - (dragbarw / 2) })
-
-        // resize the drag rectangle
-        // as we are only resizing from the right, the x coordinate does not need to change
-        dragrect
-          .attr('height', height)
-        dragbarleft
-          .attr('height', height - dragbarw)
-        dragbarright
-          .attr('height', height - dragbarw)
-      }
+    console.log(this.h, this.height)
+    if (this.isYChecked) {
+      this.dragrect
+        .attr('y', d.y = Math.max(0, Math.min(this.h - this.height, d3.event.y)))
+      this.dragbarleft
+        .attr('y', (d: any) => { return d.y })
+      this.dragbarright
+        .attr('y', (d: any) => { return d.y })
+        // dragbartop
+        //   .attr('y', (d: any) => { return d.y - (this.dragbarw / 2) })
+        // dragbarbottom
+        //   .attr('y', (d: any) => { return d.y + this.height - (this.dragbarw / 2) })
     }
   }
+
+  // 伸縮Bar callback(左)
+  private ldragresize (d: any) {
+    if (this.isXChecked) {
+      let oldx = d.x
+      // Max x on the right is x + width - dragbarw
+      // Max x on the left is 0 - (dragbarw/2)
+      d.x = Math.max(0, Math.min(d.x + this.width - (this.dragbarw / 2), d3.event.x))
+      this.width = this.width + (oldx - d.x)
+      this.dragbarleft
+        .attr('x', (d: any) => { return d.x - (this.dragbarw / 2) })
+
+      this.dragrect
+        .attr('x', (d: any) => { return d.x })
+        .attr('width', this.width)
+
+      // dragbartop
+      //   .attr('x', (d: any) => { return d.x + (this.dragbarw / 2) })
+      //   .attr('width', this.width - this.dragbarw)
+      // dragbarbottom
+      //   .attr('x', (d: any) => { return d.x + (this.dragbarw / 2) })
+      //   .attr('width', this.width - this.dragbarw)
+    }
+  }
+
+  // 伸縮Bar callback(右)
+  private rdragresize (d: any) {
+    if (this.isXChecked) {
+      // Max x on the left is x - width
+      // Max x on the right is width of screen + (dragbarw/2)
+      let dragx = Math.max(d.x + (this.dragbarw / 2), Math.min(this.w, d.x + this.width + d3.event.dx))
+
+      // recalculate width
+      this.width = dragx - d.x
+
+      // move the right drag handle
+      this.dragbarright
+        .attr('x', (d: any) => { return dragx - (this.dragbarw / 2) })
+
+      // resize the drag rectangle
+      // as we are only resizing from the right, the x coordinate does not need to change
+      this.dragrect
+        .attr('width', this.width)
+        // dragbartop
+        //   .attr('width', this.width - this.dragbarw)
+        // dragbarbottom
+        //   .attr('width', this.width - this.dragbarw)
+    }
+  }
+
+  public setRectProp (prop: string, val: any) {
+    this.dragrect.attr(prop, val)
+    return this
+  }
+
+  // 設定Bar高度
+  public setHeight (val: number) {
+    this.height = val
+    this.dragrect.attr('height', this.height)
+    this.dragbarright.attr('height', this.height)
+    this.dragbarleft.attr('height', this.height)
+    return this
+  }
+
+  // 設定Bar寬度
+  public setBarWidth (val: number) {
+    this.height = val
+    this.dragrect.attr('width', this.height)
+    this.dragbarright.attr('width', this.height)
+    this.dragbarleft.attr('width', this.height)
+    return this
+  }
+
+  // 設定
 }
 </script>
