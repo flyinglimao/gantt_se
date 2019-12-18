@@ -16,7 +16,6 @@ import store from '../store/index'
 export default class Contact extends Vue {
   @Prop() private msg!: string;
   func () {
-    console.log(store.state.pi)
   }
 }
 </script>

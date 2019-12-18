@@ -66,10 +66,9 @@ declare let d3: any
 
 @Component
 export default class GanttChart extends Vue {
-  @Prop() private msg!: string;
   private taskList: any[] = store.state.taskList
-  firstDate!: Date
-  lastDate!: Date
+  private firstDate!: Date
+  private lastDate!: Date
   mounted () {
     this.initialData()
     this.exampleChart()

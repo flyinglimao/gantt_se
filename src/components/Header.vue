@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg justify-content-between">
         <a class="navbar-brand text-dark" href="#">
             <img src="../assets/logo.png" width="30" height="30">
-            <span>Project Name</span>
+            <span>{{ projectName }}</span>
             <span>我就爛阿</span>
         </a>
         <ul class="navbar-nav float-right">
@@ -36,9 +36,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { State } from 'vuex-class'
+import store from '../store/index'
 
 @Component
 export default class Header extends Vue {
-  @Prop() private msg!: string;
+  @State(state => state.projectInfo.projectName) projectName: any
 }
 </script>

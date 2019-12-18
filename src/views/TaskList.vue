@@ -24,7 +24,7 @@
               <td class="col-dropdown"><span class="arrow"><span></span><span></span></span></td>
               <td class="col-state"><span class="state-good">●</span></td>
               <td class="col-title">
-                <input  style="text-align: center;width: 100%" v-model="item.title" type="text" id="title" >
+                <input class="form-control" style="text-align: center;width: 100%" v-model="item.title" type="text" id="title" >
                 <label for="title" style="text-align: center;width: 100%">{{item.title}}</label>
               </td>
               <td class="col-manager">
@@ -34,22 +34,22 @@
                 </select>
               </td>
               <td class="col-type">
-                <input  v-model="item.type" type="text" id="type" >
+                <input class="form-control"  v-model="item.type" type="text" id="type" >
                 <label for="type" >{{item.type}}</label>
               </td>
               <td class="col-start">
-                <input  v-model="item.start" type="text" id="start" >
+                <input class="form-control" v-model="item.start" type="date" id="start" >
                 <label for="start">{{item.start}}</label>
               </td>
               <td class="col-end">
-                <input  v-model="item.end" type="text" id="end">
+                <input class="form-control" v-model="item.end" type="date" id="end">
                 <label for="end">{{item.end}}</label>
               </td>
               <td class="col-day">
                 {{item.day}} days
               </td>
               <td class="col-progress">
-                <input  v-model="item.progress" type="text" id="progress">
+                <input class="form-control" v-model="item.progress" type="text" id="progress">
                 <label for="progress">{{item.progress}}%</label>
               </td>
               <td class="col-del">
@@ -198,23 +198,48 @@ td.editing  {
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { State } from 'vuex-class'
 import store from '../store/index'
 
-let $: any = jQuery
-@Component
-export default class TaskList extends Vue {
-  @Prop() private msg!: string;
-  private taskList: any[] = store.state.taskList;
-  searchString: string = ''
-  projectInfo = store.state.projectInfo
+declare let $: any
 
-  mounted () {
+@Component({
+  watch: {
+    projectInfo: {
+      handler (value) {
+        if (value) {
+          this.$store.dispatch('updateProjectInfo', value)
+        }
+      },
+      deep: true
+    },
+    taskList: {
+      handler (value) {
+        if (value) {
+          this.$store.dispatch('updateTaskList', value)
+        }
+      },
+      deep: true
+    }
+  }
+})
+export default class TaskList extends Vue {
+  @State(state => state.projectInfo.tasks) taskList: any
+  @State('projectInfo') projectInfo: any
+  private searchString: string = ''
+
+  created () {
+    this.$store.dispatch('bindProjectInfo')
+  }
+
+  updated () {
     $('.selectpicker').selectpicker('refresh')
   }
 
   get argtaskList () {
-    let target: any[] = this.taskList
+    let target = this.taskList as any[]
     // 資料前處理
+    if (!target) return []
     target.forEach(element => {
       // 處理日期
       let start = new Date(element.start)
