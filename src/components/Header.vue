@@ -7,13 +7,13 @@
         </a>
         <ul class="navbar-nav float-right">
             <li class="nav-item">
-                <a class="nav-link" href="#">Login</a>
+              <router-link class="nav-link" :to="'login'">Login</router-link>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Contact Information</a>
+              <router-link class="nav-link" :to="'contact'">Contact Information</router-link>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Copyright/Laws</a>
+              <router-link class="nav-link" :to="'copyright'">Copyright/Laws</router-link>
             </li>
         </ul>
     </nav>
