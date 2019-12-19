@@ -1,6 +1,9 @@
 <template>
     <ul class="nav border-top border-bottom">
         <li class="nav-item">
+            <a class="nav-link" href="#">Project</a>
+        </li>
+        <li class="nav-item">
             <router-link class="nav-link" to="task" active-class="active">Task List</router-link>
         </li>
         <li class="nav-item">

@@ -20,7 +20,7 @@
           </thead>
           <tbody @dblclick="editingCallback($event)"
                  @focusout="finishCallback($event)">
-            <tr v-for="(item,index) in argtaskList" :key="index">
+            <tr v-for="(item,index) in filteredTaskList" :key="index">
               <td class="col-dropdown"><span class="arrow"><span></span><span></span></span></td>
               <td class="col-state"><span class="state-good">●</span></td>
               <td class="col-title">
@@ -197,7 +197,7 @@ td.editing  {
 </style>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 import store from '../store/index'
 
@@ -206,23 +206,17 @@ declare let $: any
 @Component({
 })
 export default class TaskList extends Vue {
-  @State(state => state.projectInfo.tasks) _taskList: any
-  @State('projectInfo') _projectInfo: any
+  @State(state => state.projectInfo.tasks) taskList!: Array<any>
+  @State('projectInfo') projectInfo!: any
   private searchString: string = ''
 
-  get projectInfo () {
-    return this._projectInfo
+  @Watch('taskList', { deep: true })
+  updateTaskList (value: any) {
+    this.$store.dispatch('updateTaskList', value)
   }
 
-  set projectInfo (value) {
-    this.$store.dispatch('updateProjectInfo', value)
-  }
-
-  get taskList () {
-    return this._taskList
-  }
-
-  set taskList (value) {
+  @Watch('projectInfo', { deep: true })
+  updateProjectInfo (value: any) {
     this.$store.dispatch('updateProjectInfo', value)
   }
 
@@ -230,25 +224,11 @@ export default class TaskList extends Vue {
     $('.selectpicker').selectpicker('refresh')
   }
 
-  get argtaskList () {
-    let target = this.taskList as any[]
-    // 資料前處理
-    if (!target) return []
-    target.forEach(element => {
-      // 處理日期
-      let start = new Date(element.start)
-      let end = new Date(element.end)
-      element['day'] = ((end.getTime() - start.getTime()) / 86400000).toFixed(0)
-      if (isNaN(element['day']) || element['day'] < 0) {
-        element['day'] = 0
-      }
-    })
-
-    // 搜尋功能
-    if (this.searchString === '') {
-      return target
+  get filteredTaskList () {
+    if (this.searchString) {
+      return this.taskList.filter(x => x.title.indexOf(this.searchString) !== -1)
     } else {
-      return target.filter(item => item.title.search(this.searchString) !== -1)
+      return this.taskList
     }
   }
 
