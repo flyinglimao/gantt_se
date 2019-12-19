@@ -9,5 +9,9 @@ Vue.config.productionTip = false
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: h => h(App),
+  beforeCreate () {
+    this.$store.dispatch('bindProjectInfo')
+    this.$store.dispatch('auth')
+  }
 }).$mount('#app')

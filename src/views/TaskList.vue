@@ -24,8 +24,8 @@
               <td class="col-dropdown"><span class="arrow"><span></span><span></span></span></td>
               <td class="col-state"><span class="state-good">●</span></td>
               <td class="col-title">
-                <input class="form-control" style="text-align: center;width: 100%" v-model="item.title" type="text" id="title" >
-                <label for="title" style="text-align: center;width: 100%">{{item.title}}</label>
+                <input class="form-control" style="text-align: center;width: 100%" v-model="item.title" type="text" :id="'title' + index">
+                <label :for="'title' + index" style="text-align: center;width: 100%">{{item.title}}</label>
               </td>
               <td class="col-manager">
                 <select class="selectpicker" :id="'selectpicker'+index" multiple data-live-search="true" @change="updateManagers($event, index)">
@@ -34,23 +34,23 @@
                 </select>
               </td>
               <td class="col-type">
-                <input class="form-control"  v-model="item.type" type="text" id="type" >
-                <label for="type" >{{item.type}}</label>
+                <input class="form-control"  v-model="item.type" type="text" :id="'type' + index">
+                <label :for="'type' + index" >{{item.type}}</label>
               </td>
               <td class="col-start">
-                <input class="form-control" v-model="item.start" type="date" id="start" >
-                <label for="start">{{item.start}}</label>
+                <input class="form-control" v-model="item.start" type="date" :id="'start' + index">
+                <label :for="'start' + index">{{item.start}}</label>
               </td>
               <td class="col-end">
-                <input class="form-control" v-model="item.end" type="date" id="end">
-                <label for="end">{{item.end}}</label>
+                <input class="form-control" v-model="item.end" type="date" :id="'end' + index">
+                <label :for="'end' + index">{{item.end}}</label>
               </td>
               <td class="col-day">
                 {{item.day}} days
               </td>
               <td class="col-progress">
-                <input class="form-control" v-model="item.progress" type="text" id="progress">
-                <label for="progress">{{item.progress}}%</label>
+                <input class="form-control" v-model="item.progress" type="text" :id="'progress' + index">
+                <label :for="'progress' + index">{{item.progress}}%</label>
               </td>
               <td class="col-del">
                 <button class="text-danger delete-btn" @click="deleteTaskCallback(index)">
@@ -204,32 +204,26 @@ import store from '../store/index'
 declare let $: any
 
 @Component({
-  watch: {
-    projectInfo: {
-      handler (value) {
-        if (value) {
-          this.$store.dispatch('updateProjectInfo', value)
-        }
-      },
-      deep: true
-    },
-    taskList: {
-      handler (value) {
-        if (value) {
-          this.$store.dispatch('updateTaskList', value)
-        }
-      },
-      deep: true
-    }
-  }
 })
 export default class TaskList extends Vue {
-  @State(state => state.projectInfo.tasks) taskList: any
-  @State('projectInfo') projectInfo: any
+  @State(state => state.projectInfo.tasks) _taskList: any
+  @State('projectInfo') _projectInfo: any
   private searchString: string = ''
 
-  created () {
-    this.$store.dispatch('bindProjectInfo')
+  get projectInfo () {
+    return this._projectInfo
+  }
+
+  set projectInfo (value) {
+    this.$store.dispatch('updateProjectInfo', value)
+  }
+
+  get taskList () {
+    return this._taskList
+  }
+
+  set taskList (value) {
+    this.$store.dispatch('updateProjectInfo', value)
   }
 
   updated () {

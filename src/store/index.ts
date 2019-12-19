@@ -18,10 +18,18 @@ Vue.use(Vuex)
 
 export default new Vuex.Store<any>({
   state: {
-    projectInfo: {}
+    projectInfo: {},
+    user: {
+      id: null,
+      name: null
+    }
   },
   mutations: {
-    ...vuexfireMutations
+    ...vuexfireMutations,
+    updateUser (state, user) {
+      state.user.id = user.uid
+      state.user.name = user.displayName
+    }
   },
   actions: {
     bindProjectInfo: firestoreAction(async (context) => {
@@ -68,8 +76,13 @@ export default new Vuex.Store<any>({
         .collection('projectInfo')
         .doc('test')
         .update({ tasks: commit })
+    },
+    auth: (store, commit) => {
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          store.commit('updateUser', user)
+        }
+      })
     }
-  },
-  modules: {
   }
 })

@@ -7,7 +7,8 @@
         </a>
         <ul class="navbar-nav float-right">
             <li class="nav-item">
-              <router-link class="nav-link" :to="'login'">Login</router-link>
+              <a class="nav-link" @click="login" href="#" v-if="!displayName">Login</a>
+              <a class="nav-link" href="#" v-if="displayName">{{ displayName }}</a>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" :to="'contact'">Contact Information</router-link>
@@ -36,11 +37,24 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import firebase from 'firebase'
 import { State } from 'vuex-class'
 import store from '../store/index'
 
 @Component
 export default class Header extends Vue {
   @State(state => state.projectInfo.projectName) projectName: any
+  @State(state => state.user.name) displayName: any
+
+  login () {
+    let fbProvider = new firebase.auth.FacebookAuthProvider()
+    fbProvider.setCustomParameters({
+      'display': 'popup'
+    })
+
+    firebase.auth().signInWithPopup(fbProvider).then(res => {
+      window.console.log(res.user)
+    })
+  }
 }
 </script>
