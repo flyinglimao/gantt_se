@@ -45,7 +45,7 @@ export default new Vuex.Store<any>({
               '宇宸',
               '潘瑨'
             ],
-            teamMember: [
+            teamMember: [ // will be changed to email
               '捷哥',
               '世雄',
               '宇宸',

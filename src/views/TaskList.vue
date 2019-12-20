@@ -22,7 +22,7 @@
                  @focusout="finishCallback($event)">
             <tr v-for="(item,index) in filteredTaskList" :key="index">
               <td class="col-dropdown"><span class="arrow"><span></span><span></span></span></td>
-              <td class="col-state"><span class="state-good">●</span></td>
+              <td class="col-state" @click="toggleState(item)"><span :class="'state-' + state[item.state - 1]">●</span></td>
               <td class="col-title">
                 <input class="form-control" style="text-align: center;width: 100%" v-model="item.title" type="text" :id="'title' + index">
                 <label :for="'title' + index" style="text-align: center;width: 100%">{{item.title}}</label>
@@ -38,15 +38,15 @@
                 <label :for="'type' + index" >{{item.type}}</label>
               </td>
               <td class="col-start">
-                <input class="form-control" v-model="item.start" type="date" :id="'start' + index">
+                <input class="form-control" v-model="item.start" type="date" :id="'start' + index" :max="item.end">
                 <label :for="'start' + index">{{item.start}}</label>
               </td>
               <td class="col-end">
-                <input class="form-control" v-model="item.end" type="date" :id="'end' + index">
+                <input class="form-control" v-model="item.end" type="date" :id="'end' + index" :min="item.start">
                 <label :for="'end' + index">{{item.end}}</label>
               </td>
               <td class="col-day">
-                {{item.day}} days
+                {{ moment(item.start).to(item.end) }}
               </td>
               <td class="col-progress">
                 <input class="form-control" v-model="item.progress" type="text" :id="'progress' + index">
@@ -178,6 +178,12 @@ td:not(:nth-child(3)), th {
 .state-good {
   color: lightgreen;
 }
+.state-warn {
+  color: lightsalmon;
+}
+.state-bad {
+  color: red;
+}
 input {
   height: 100%;
   width: 100%;
@@ -199,13 +205,15 @@ td.editing  {
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
-import store from '../store/index'
+import moment from 'moment'
 
 declare let $: any
 
 @Component({
 })
 export default class TaskList extends Vue {
+  private state = ['good', 'warn', 'bad']
+
   @State(state => state.projectInfo.tasks) taskList!: Array<any>
   @State('projectInfo') projectInfo!: any
   private searchString: string = ''
@@ -220,6 +228,10 @@ export default class TaskList extends Vue {
     this.$store.dispatch('updateProjectInfo', value)
   }
 
+  created () {
+    // moment.locale('zh-tw')
+  }
+
   updated () {
     $('.selectpicker').selectpicker('refresh')
   }
@@ -232,14 +244,23 @@ export default class TaskList extends Vue {
     }
   }
 
+  moment (source: string) {
+    return moment(source)
+  }
+
+  toggleState (item: any) {
+    item.state = (item.state) % 3 + 1
+  }
+
   editingCallback (e: Event) {
     let ref = e.target as HTMLElement
     if (ref.classList.contains('col-day')) return
     if (ref.nodeName === 'TD') {
       ref.classList.add('editing')
-
-      let inputElement = ref.querySelector('input') as HTMLElement
-      inputElement.focus()
+      try {
+        let inputElement = ref.querySelector('input') as HTMLElement
+        inputElement.focus()
+      } catch (_) {}
     } else if (ref.nodeName === 'LABEL') {
       let parent = ref.parentElement as HTMLElement
       parent.classList.add('editing')
@@ -268,7 +289,7 @@ export default class TaskList extends Vue {
     let today = new Date()
     let daystring = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
     let task = {
-      state: 0,
+      state: 1,
       title: 'new title',
       type: 'Hello',
       start: daystring,
