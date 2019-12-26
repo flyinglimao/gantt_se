@@ -166,11 +166,38 @@
             </template>
           </tbody>
         </table>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Add Member</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="column">
+                  <div class="row justify-content-center">
+                    <label for="addmember" class="col-2" style="line-height: 2">Name: </label>
+                    <input type="text" class="form-control col-5" id="addmember">
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @click="addMemberCallback()">Add Member</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <button @click="createTaskCallback()" class="btn btn-light">+ Add new task/milestone</button>
+        <button  class="btn btn-light" >Store Task</button>
+
       </div>
       <div class="col-2 border-left">
         <div class="btn-group-vertical w-100 mt-2">
-          <button class="btn btn-outline-dark w-100">Add new member</button>
+          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#exampleModalLong">Add new member</button>
           <button class="btn btn-outline-dark w-100">Add comment</button>
           <button class="btn btn-outline-dark w-100">Add submission</button>
         </div>
@@ -181,7 +208,7 @@
             <table class="table table-sm">
               <tr>
                 <td>Total Members</td>
-                <td>9</td>
+                <td>{{ numberOfMember }}</td>
               </tr>
               <tr>
                 <td>Total Day Remain</td>
@@ -201,15 +228,15 @@
             <table class="table table-sm">
               <tr>
                 <td>Total Day Elapsed</td>
-                <td>9</td>
+                <td>{{ numberOfDateElapse }}</td>
               </tr>
               <tr>
                 <td>Total Day Remain</td>
-                <td>99</td>
+                <td>{{ numberOfDateRemain }}</td>
               </tr>
               <tr>
                 <td>Total Day Duration</td>
-                <td>123</td>
+                <td>{{ numberOfTotalDay }}</td>
               </tr>
             </table>
           </div>
@@ -289,6 +316,10 @@ td:not(:nth-child(3)), th {
       background-color: rgba(0,0,0,0);
     }
   }
+  height: 70%;
+  min-height: 700px;
+  overflow-y: scroll;
+
 }
 .sub-table {
   table {
@@ -397,6 +428,28 @@ export default class TaskList extends Vue {
     }
   }
 
+  get numberOfMember () {
+    return this.projectInfo.teamMember.length
+  }
+
+  get numberOfDateElapse () {
+    let start = this.projectInfo.startDate.seconds
+    let result = (Date.now() / 1000 - start) / 86400
+    return result.toFixed(0)
+  }
+
+  get numberOfDateRemain () {
+    let end = this.projectInfo.releaseDate
+    let result = (end.seconds - Date.now() / 1000) / 86400
+    return result.toFixed(0)
+  }
+
+  get numberOfTotalDay () {
+    let start = this.projectInfo.startDate.seconds
+    let end = this.projectInfo.releaseDate.seconds
+    return (end - start) / 86400
+  }
+
   getSubTaskList (parentItem: any) {
     let parentId = parentItem.taskId
     return this.taskList.filter(x => {
@@ -437,7 +490,7 @@ export default class TaskList extends Vue {
     let subTable = currentTarget.parentElement as HTMLElement
     subTable = subTable.parentElement as HTMLElement
     subTable = subTable.querySelector('#sub' + taskId) as HTMLElement
-    console.log(subTable)
+
     if (currentTarget.nodeName === 'TD') {
       currentTarget = currentTarget.querySelector('span') as HTMLElement
     }
@@ -453,7 +506,6 @@ export default class TaskList extends Vue {
   }
 
   toggleSubSubTable (e: Event, taskId: string) {
-    console.log(taskId)
     let currentTarget = e.currentTarget as HTMLElement
     let subTable = currentTarget.parentElement as HTMLElement
     subTable = subTable.parentElement as HTMLElement
@@ -530,6 +582,13 @@ export default class TaskList extends Vue {
     }
     console.log(task)
     // this.taskList.push(task)
+  }
+
+  addMemberCallback () {
+    let input = document.querySelector('#addmember') as HTMLInputElement
+    let member = input.value
+    this.projectInfo.teamMember.push(member)
+    input.value = ''
   }
 }
 </script>

@@ -15,6 +15,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-y: hidden;
 }
 .main {
   flex-grow: 1;
