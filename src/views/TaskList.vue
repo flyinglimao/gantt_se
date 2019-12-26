@@ -39,8 +39,8 @@
                 <label :for="'type' + item.taskId" >{{item.type}}</label>
               </td>
               <td class="col-start">
-                <input class="form-control" v-model="item.start" type="date" :id="'start' + index" :max="item.end">
-                <label :for="'start' + index">{{item.start}}</label>
+                <input class="form-control" v-model="item.start" type="date" :id="'start' + item.taskId" :max="item.end">
+                <label :for="'start' + item.taskId">{{item.start}}</label>
               </td>
               <td class="col-end">
                 <input class="form-control" v-model="item.end" type="date" :id="'end' + item.taskId" :min="item.start">
