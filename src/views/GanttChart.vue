@@ -1,11 +1,11 @@
 <template>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-9" id="chart">
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class='col-9' id='chart'>
       </div>
-      <div class="col-3 border-left pt-3">
+      <div class='col-3 border-left pt-3'>
         <h5>Mission Title</h5>
-        <table class="table table-sm">
+        <table class='table table-sm'>
           <tr>
             <td>Type</td>
             <td>Some</td>
@@ -13,11 +13,11 @@
         </table>
       </div>
     </div>
-    <div class="bar" style="display: none"></div>
+    <div class='bar' style='display: none'></div>
   </div>
 </template>
 
-<style lang="scss">
+<style lang='scss'>
 .row {
   height: 100%;
 }
@@ -32,6 +32,9 @@
     text-overflow: ellipsis;
     overflow: hidden;
   }
+  .resizer {
+    cursor: ew-resize;
+  }
 }
 button {
   font-size: 1.5em; float: left;
@@ -39,7 +42,7 @@ button {
 }
 </style>
 
-<script lang="ts">
+<script lang='ts'>
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 
@@ -50,58 +53,163 @@ export default class GanttChart extends Vue {
   @State(state => state.projectInfo.tasks) taskList!: Array<any>
   @State('projectInfo') projectInfo!: any
   private searchString: string = ''
+  private lock: boolean = false
 
   @Watch('taskList', { deep: true })
   updateTaskList (value: any) {
     this.$store.dispatch('updateTaskList', value)
   }
 
-  @Watch('projectInfo', { deep: true })
-  updateProjectInfo (value: any) {
-    this.$store.dispatch('updateProjectInfo', value)
-  }
-
   private firstDate!: Date
   private lastDate!: Date
 
+  beforeRouteEnter (to: string, from: string, next: Function) {
+    next((vm: any) => {
+      vm.updateChart()
+    })
+  }
+
   @Watch('taskList')
   updateChart () {
+    if (!this.taskList || this.lock) return
+    let self = this
+    function scrubTime (date: string) {
+      let d = new Date(Date.parse(date))
+      d.setHours(0)
+      return d
+    }
+
+    function scrubTimeInvert (time: Date) {
+      return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
+    }
+
     let margin = { top: 20, right: 20, bottom: 50, left: 20 }
-    let width = parseInt(d3.select('#chart').style('width')) - margin.left - margin.right
+    let width = parseInt(d3.select('#chart').style('width')) - margin.left - margin.right - 120
     let height = parseInt(d3.select('#chart').style('height')) - margin.top - margin.bottom
 
     let xScale = d3.scaleTime()
-      .domain([Date.now() - 15 * 8 * 60 * 60 * 1000, Date.now() + 15 * 16 * 60 * 60 * 1000])
+      .domain([Date.now() - 8 * 86400 * 1000, Date.now() + 16 * 86400 * 1000])
       .range([0, width])
 
     let yScale = d3.scaleLinear()
       .domain([0, height])
       .range([0, height])
 
+    let aAxis = d3.axisTop(xScale)
+      .ticks(d3.timeDay.every(1))
+
+    d3.select('#chart').select('svg').remove()
+
     let svg = d3.select('#chart').append('svg')
       .attr('width', width)
       .attr('height', height)
-      .append('g')
 
-    svg.append('g').selectAll('.line')
+    let timeline = svg.append('g')
+    timeline.append('g')
+      .attr('transform', 'translate(120, 30)')
+      .call(aAxis)
+
+    timeline.append('g').selectAll('.line') // diviving line
       .data(this.taskList)
       .enter().append('line')
       .attr('x1', 120)
-      .attr('y1', (d: any, i: number) => yScale(i * 30))
-      .attr('x2', width - 180)
-      .attr('y2', (d: any, i: number) => yScale(i * 30))
+      .attr('y1', (d: any, i: number) => yScale(i * 30 + 40))
+      .attr('x2', width)
+      .attr('y2', (d: any, i: number) => yScale(i * 30 + 40))
       .attr('stroke', 'lightgray')
 
-    svg.append('g').selectAll('.title')
+    let timelineRect = timeline.append('g').selectAll('rect') // timeline
+      .data(this.taskList)
+      .enter().append('rect')
+      .attr('x', (d: any) => Math.max(xScale(scrubTime(d.start)) + 120, 120))
+      .attr('y', (d: any, i: number) => yScale(i * 30) + 43)
+      .attr('width', (d: any) => xScale(scrubTime(d.end)) - xScale(scrubTime(d.start)))
+      .attr('height', (d: any) => 0.8 * yScale(30))
+      .attr('style', 'fill:rgb(255, 153, 51)')
+
+    timelineRect.each(function (this: HTMLElement, d: any) {
+      let refer = d3.select(this)
+      let parent = d3.select(this.parentElement)
+
+      let left = parent.append('line')
+        .attr('class', 'resizer')
+        .attr('x1', refer.attr('x'))
+        .attr('x2', refer.attr('x'))
+        .attr('y1', refer.attr('y'))
+        .attr('y2', +refer.attr('y') + 24)
+        .attr('stroke', 'lightgray')
+        .attr('stroke-width', 4)
+        .call(d3.drag()
+          .container(svg.node())
+          .subject(function () {
+            return { x: d3.event.x, y: d3.event.y }
+          })
+          .on('start', () => { self.lock = true })
+          .on('drag', function (this: HTMLElement, d: any) {
+            let x = Math.min(Math.max(d3.event.x, 120), +refer.attr('x') + +refer.attr('width'))
+            refer.attr('width', +refer.attr('width') + +refer.attr('x') - x)
+            refer.attr('x', x)
+            d3.select(this).attr('x1', x)
+            d3.select(this).attr('x2', x)
+          })
+          .on('end', () => {
+            d.start = scrubTimeInvert(xScale.invert(+refer.attr('x') - 120))
+            self.lock = false
+            self.updateChart()
+          })
+        )
+
+      parent.append('line')
+        .attr('class', 'resizer')
+        .attr('x1', +refer.attr('x') + +refer.attr('width'))
+        .attr('x2', +refer.attr('x') + +refer.attr('width'))
+        .attr('y1', refer.attr('y'))
+        .attr('y2', +refer.attr('y') + 24)
+        .attr('stroke', 'lightgray')
+        .attr('stroke-width', 4)
+        .call(d3.drag()
+          .container(svg.node())
+          .subject(function () {
+            return { x: d3.event.x, y: d3.event.y }
+          })
+          .on('start', () => { self.lock = true })
+          .on('drag', function (this: HTMLElement, d: any) {
+            let x = Math.min(Math.max(d3.event.x, +refer.attr('x')), width)
+            refer.attr('width', x - +refer.attr('x'))
+            d3.select(this).attr('x1', x)
+            d3.select(this).attr('x2', x)
+          })
+          .on('end', () => {
+            d.end = scrubTimeInvert(xScale.invert(+refer.attr('x') + +refer.attr('width') - 120))
+            self.lock = false
+            self.updateChart()
+          })
+        )
+    })
+
+    let labels = svg.append('g')
+    labels.selectAll('.title') // task label
       .data(this.taskList)
       .enter().append('foreignObject')
       .attr('x', 0)
-      .attr('y', (d: any, i: number) => yScale(i * 30))
+      .attr('y', (d: any, i: number) => yScale(i * 30 + 40))
       .attr('width', 100)
       .attr('height', 30)
       .append('xhtml:span')
       .attr('class', 'label')
       .text((d: any) => d.title)
+
+    labels.append('line')
+      .attr('x1', 105)
+      .attr('y1', 40)
+      .attr('x2', 105)
+      .attr('y2', height)
+      .attr('stroke', 'lightgray')
+
+    svg.call(d3.zoom()
+      .on('zoom', function () {
+        console.log(d3.event)
+      }))
   }
 }
 </script>
