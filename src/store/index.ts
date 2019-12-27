@@ -18,7 +18,40 @@ Vue.use(Vuex)
 
 export default new Vuex.Store<any>({
   state: {
-    projectInfo: {},
+    projectInfo: {
+      projectName: '我就爛',
+      projectOwner: [
+        '捷哥',
+        '世雄',
+        '宇宸',
+        '潘瑨'
+      ],
+      teamMember: [ // will be changed to email
+        '捷哥',
+        '世雄',
+        '宇宸',
+        '潘瑨',
+        '米卡狗'
+      ],
+      tasks: [
+        { state: 1, taskId: '1', title: '捷哥是在哈搂???', managers: ['捷哥'], type: 'Hello', start: '2019-12-06', end: '2019-12-12', progress: 0 },
+        { state: 1, taskId: '2', title: '世雄是在哈搂???', managers: ['世雄'], type: 'Hello', start: '2019-12-06', end: '2019-12-17', progress: 50 },
+        { state: 1, taskId: '3', title: '宇宸是在哈搂???', managers: ['宇宸'], type: 'Hello', start: '2019-12-06', end: '2019-12-19', progress: 75 },
+        { state: 1, taskId: '4', title: '潘瑨是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '1-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '1-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '2-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '2-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '3-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '1-1-1', title: '1--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '1-2-1', title: '2--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '2-1-1', title: '3--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '2-2-1', title: '4--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+        { state: 1, taskId: '3-1-1', title: '5--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 }
+      ],
+      startDate: (new Date('2019-12-1')),
+      releaseDate: (new Date('2020-2-25'))
+    },
     user: {
       id: null,
       name: null
@@ -68,8 +101,8 @@ export default new Vuex.Store<any>({
               { state: 1, taskId: '2-2-1', title: '4--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
               { state: 1, taskId: '3-1-1', title: '5--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 }
             ],
-            startDate: (new Date('2019-12-1')),
-            releaseDate: (new Date('2020-2-25'))
+            startDate: '2019-12-1',
+            releaseDate: '2020-2-25'
           })
         }
       })
