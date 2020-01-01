@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex, { Store } from 'vuex'
 import { vuexfireMutations, firestoreAction } from 'vuexfire'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -56,7 +56,9 @@ export default new Vuex.Store<any>({
       id: null,
       name: null,
       email: null
-    }
+    },
+    projectList: [],
+    projectId: []
   },
   mutations: {
     ...vuexfireMutations,
@@ -117,23 +119,33 @@ export default new Vuex.Store<any>({
         .doc('test')
         .set(commit)
     },
-    // resetProjectInfo: () => {
-    //   return db
-    //     .collection('projectInfo')
-    //     .doc('test')
-    //     .get()
-    // },
     updateTaskList: (_, commit) => {
       return db
         .collection('projectInfo')
         .doc('test')
         .update({ tasks: commit })
     },
+    bindProjectList: firestoreAction(async (_, email) => {
+      let ref = db.collection('projectList').doc(email)
+      ref.get().then(doc => {
+        if (!doc.exists) {
+          ref.set({ projectList: [] })
+          console.log('not exist')
+        }
+      })
+      return _.bindFirestoreRef('projectList', ref)
+    }),
+    addProjectInfo: (_, commit) => {
+      return db.collection('projectInfo').add(commit)
+    },
     auth: (store, commit) => {
       firebase.auth().onAuthStateChanged(user => {
         console.log('auth change')
         if (user) {
           store.commit('updateUser', user)
+          store.dispatch('bindProjectList', user.email).then(() => {
+            console.log(store.state.projectList)
+          })
         } else {
           store.commit('updateUser', {
             id: null,

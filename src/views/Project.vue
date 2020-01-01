@@ -50,17 +50,8 @@
           <div class="card-content">
             <p class="font-weight-bold mb-0">Project List</p>
             <table class="table table-sm">
-              <tr>
-                <td>Total Members</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td>Total Day Remain</td>
-                <td>99</td>
-              </tr>
-              <tr>
-                <td>Total Day Duration</td>
-                <td>123</td>
+              <tr v-for="project in projectList.projectList" :key="project.id">
+                <td>{{ project.projectName }}</td>
               </tr>
             </table>
           </div>
@@ -107,15 +98,15 @@
             <div class="column">
               <div class="row justify-content-center">
                 <label for="projectName" class="col-2" style="line-height: 2">Project Name</label>
-                <input type="text" class="form-control col-5" id="projectName">
+                <input type="text" class="form-control col-5" id="projectName" v-model="createdProject.projectName" placeholder="Project Name">
               </div>
               <div class="row justify-content-center">
                 <label for="startDate" class="col-2" style="line-height: 2">Start Date</label>
-                <input type="date" class="form-control col-5" id="startDate">
+                <input type="date" class="form-control col-5" id="startDate" v-model="createdProject.startDate">
               </div>
               <div class="row justify-content-center">
                 <label for="releaseDate" class="col-2" style="line-height: 2">Release Date</label>
-                <input type="date" class="form-control col-5" id="releaseDate">
+                <input type="date" class="form-control col-5" id="releaseDate" v-model="createdProject.releaseDate">
               </div>
 
             </div>
@@ -170,6 +161,17 @@ export default class Project extends Vue {
   private updatedProjectInfo: any
   private initialProjectInfo: any
   @State(state => state.projectInfo) projectInfo: any
+  @State(state => state.user) userInfo: any
+  @State(state => state.projectList) projectList: any
+  currentDate:Date = new Date()
+  createdProject: any = {
+    projectName: '',
+    projectOwner: [],
+    startDate: '',
+    releaseDate: '',
+    taskList: [],
+    teamMember: []
+  }
 
   @Watch('projectInfo', { deep: true })
   watchProjectInfo (value: any) {
@@ -179,6 +181,14 @@ export default class Project extends Vue {
   mounted () {
     this.initialProjectInfo = this.projectInfo
     $('.selectpicker').selectpicker('refresh')
+    this.createdProject.projectName = ''
+    this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
+    this.createdProject.startDate = this.currentDate.toJSON().substr(0, 10)
+    this.createdProject.releaseDate = this.currentDate.toJSON().substr(0, 10)
+  }
+
+  created () {
+    console.log('create')
   }
 
   destry () {
@@ -202,9 +212,24 @@ export default class Project extends Vue {
     alert('successfully reset')
   }
 
+  createProjectCallback () {
+    console.log(this.createdProject)
+    this.$store.dispatch('addProjectInfo', this.createdProject).then(docRef => {
+      console.log('docRef.id,', docRef.id, '\nprojectName: ', docRef.projectName)
+
+      this.createdProject.projectName = ''
+      this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
+      this.createdProject.startDate = this.currentDate.toJSON().substr(0, 10)
+      this.createdProject.releaseDate = this.currentDate.toJSON().substr(0, 10)
+    }).catch(err => {
+      console.log(err)
+    })
+
+    $('#createProjectModal').modal('hide')
+  }
+
   test () {
-    let a = document.querySelector('#start') as HTMLInputElement
-    console.log(a.value)
+    console.log(this.projectList)
   }
 }
 

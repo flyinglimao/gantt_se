@@ -331,7 +331,7 @@ export default class Header extends Vue {
     if (authProvider !== null) {
       firebase.auth().signInWithPopup(authProvider).then(res => {
         this.email = res.user !== null && res.user.hasOwnProperty('email') ? res.user.email : null
-        window.console.log(res.user)
+        // this.$store.dispatch('bindProjectList', this.email)
         $('#loginModal').modal('hide')
       })
     }
