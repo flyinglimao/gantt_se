@@ -7,6 +7,7 @@
         </form>
         <table class="table table-striped table-responsive main-table">
           <thead>
+            <th style="min-width: 2em"><input type="checkbox" class="checkbox"></th>
             <th>#</th>
             <th style="min-width: 3em">State</th>
             <th class="col">Title</th>
@@ -22,6 +23,7 @@
                  @focusout="finishCallback($event)">
             <template v-for="(item) in filteredTaskList">
             <tr :key="item.taskId" :id="item.taskId">
+              <td style="min-width: 2em"><input type="checkbox" class="checkbox"></td>
               <td class="col-dropdown" @click="toggleSubTable($event, item.taskId)"><span class="arrow" :id="'span' + item.taskId" ><span></span><span></span></span></td>
               <td class="col-state noselect" @click="toggleState(item)"><span :class="'state-' + state[item.state - 1]" >●</span></td>
               <td class="col-title">
@@ -69,6 +71,7 @@
                 <table>
                   <template v-for="(subItem) in getSubTaskList(item)">
                   <tr  :key="subItem.taskId" :id="subItem.taskId">
+                    <td><input type="checkbox" class="checkbox"></td>
                     <td class="col-dropdown" @click="toggleSubSubTable($event, subItem.taskId)"><span class="arrow"><span></span><span></span></span></td>
                     <td class="col-state noselect" @click="toggleState(subItem)"><span :class="'state-' + state[subItem.state - 1]" >●</span></td>
                     <td class="col-title">
@@ -115,6 +118,7 @@
                     <td  colspan="10" class="subsub-table">
                       <table >
                         <tr v-for="(subsubitem) in getSubSubTaskList(subItem)" :key="subsubitem.taskId">
+                          <td><input type="checkbox" class="checkbox"></td>
                           <td class="col-state noselect" @click="toggleState(subsubitem)"><span :class="'state-' + state[subsubitem.state - 1]" >●</span></td>
                           <td class="col-title">
                             <input class="form-control" style="text-align: center;width: 100%" v-model="subsubitem.title" type="text" :id="'title' + subsubitem.taskId">
@@ -247,6 +251,10 @@
 </template>
 
 <style lang="scss" scoped>
+.checkbox {
+  display: inline !important;
+}
+
 .row {
   height: 100%;
 }
@@ -415,6 +423,10 @@ export default class TaskList extends Vue {
   }
   // life hook
   updated () {
+    // $('.selectpicker').selectpicker('refresh')
+  }
+
+  mounted () {
     $('.selectpicker').selectpicker('refresh')
   }
 

@@ -54,14 +54,17 @@ export default new Vuex.Store<any>({
     },
     user: {
       id: null,
-      name: null
+      name: null,
+      email: null
     }
   },
   mutations: {
     ...vuexfireMutations,
     updateUser (state, user) {
+      console.log('udpate user')
       state.user.id = user.uid
       state.user.name = user.displayName
+      state.user.email = user.email
     }
   },
   actions: {
@@ -114,6 +117,12 @@ export default new Vuex.Store<any>({
         .doc('test')
         .set(commit)
     },
+    // resetProjectInfo: () => {
+    //   return db
+    //     .collection('projectInfo')
+    //     .doc('test')
+    //     .get()
+    // },
     updateTaskList: (_, commit) => {
       return db
         .collection('projectInfo')
@@ -122,8 +131,15 @@ export default new Vuex.Store<any>({
     },
     auth: (store, commit) => {
       firebase.auth().onAuthStateChanged(user => {
+        console.log('auth change')
         if (user) {
           store.commit('updateUser', user)
+        } else {
+          store.commit('updateUser', {
+            id: null,
+            name: null,
+            email: null
+          })
         }
       })
     }
