@@ -4,11 +4,27 @@
       <div class='col-9' id='chart'>
       </div>
       <div class='col-3 border-left pt-3'>
-        <h5>Mission Title</h5>
+        <h5>{{ title }}</h5>
         <table class='table table-sm'>
           <tr>
             <td>Type</td>
-            <td>Some</td>
+            <td>{{ type }}</td>
+          </tr>
+          <tr>
+            <td>Start</td>
+            <td>{{ start }}</td>
+          </tr>
+          <tr>
+            <td>End</td>
+            <td>{{ end }}</td>
+          </tr>
+          <tr>
+            <td>Manager</td>
+            <td>{{ managers }}</td>
+          </tr>
+          <tr>
+            <td>Progress</td>
+            <td>{{ progress }}</td>
           </tr>
         </table>
       </div>
@@ -54,6 +70,13 @@ export default class GanttChart extends Vue {
   @State('projectInfo') projectInfo!: any
   private searchString: string = ''
   private lock: boolean = false
+  private type: string = ''
+  private title: string = ''
+  private start: string = ''
+  private end: string = ''
+  private managers: string = ''
+  private progress: string = ''
+  private xScale!: any
 
   @Watch('taskList', { deep: true })
   updateTaskList (value: any) {
@@ -85,9 +108,9 @@ export default class GanttChart extends Vue {
 
     let margin = { top: 20, right: 20, bottom: 50, left: 20 }
     let width = parseInt(d3.select('#chart').style('width')) - margin.left - margin.right - 120
-    let height = parseInt(d3.select('#chart').style('height')) - margin.top - margin.bottom
+    let height = this.taskList.length * 30 + 80
 
-    let xScale = d3.scaleTime()
+    let xScale = this.xScale || d3.scaleTime()
       .domain([Date.now() - 8 * 86400 * 1000, Date.now() + 16 * 86400 * 1000])
       .range([0, width])
 
@@ -105,7 +128,7 @@ export default class GanttChart extends Vue {
       .attr('height', height)
 
     let timeline = svg.append('g')
-    timeline.append('g')
+    let axis = timeline.append('g')
       .attr('transform', 'translate(120, 30)')
       .call(aAxis)
 
@@ -123,7 +146,7 @@ export default class GanttChart extends Vue {
       .enter().append('rect')
       .attr('x', (d: any) => Math.max(xScale(scrubTime(d.start)) + 120, 120))
       .attr('y', (d: any, i: number) => yScale(i * 30) + 43)
-      .attr('width', (d: any) => xScale(scrubTime(d.end)) - xScale(scrubTime(d.start)))
+      .attr('width', (d: any) => xScale(scrubTime(d.end)) + 120 - Math.max(xScale(scrubTime(d.start)) + 120, 120))
       .attr('height', (d: any) => 0.8 * yScale(30))
       .attr('style', 'fill:rgb(255, 153, 51)')
 
@@ -174,6 +197,7 @@ export default class GanttChart extends Vue {
           })
           .on('start', () => { self.lock = true })
           .on('drag', function (this: HTMLElement, d: any) {
+            d3.event.stopPropagation()
             let x = Math.min(Math.max(d3.event.x, +refer.attr('x')), width)
             refer.attr('width', x - +refer.attr('x'))
             d3.select(this).attr('x1', x)
@@ -198,6 +222,14 @@ export default class GanttChart extends Vue {
       .append('xhtml:span')
       .attr('class', 'label')
       .text((d: any) => d.title)
+      .on('click', (d: any) => {
+        self.title = d.title
+        self.type = d.type
+        self.start = d.start
+        self.end = d.end
+        self.managers = d.managers.join(',')
+        self.progress = d.progress
+      })
 
     labels.append('line')
       .attr('x1', 105)
@@ -206,9 +238,14 @@ export default class GanttChart extends Vue {
       .attr('y2', height)
       .attr('stroke', 'lightgray')
 
+    let x, y, s
     svg.call(d3.zoom()
+      .scaleExtent([0.1, 10])
+      .translateExtent([[0, 0], [width, height]])
+      .extent([[0, 0], [width, height]])
       .on('zoom', function () {
-        console.log(d3.event)
+        self.xScale = d3.event.transform.rescaleX(xScale)
+        self.updateChart()
       }))
   }
 }
