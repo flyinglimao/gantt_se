@@ -197,11 +197,13 @@ declare let $: any
 
 @Component
 export default class Project extends Vue {
-  private updatedProjectInfo: any
   private initialProjectInfo: any
+  private firstInit = false
+  private hasUpdateOwner = false
   addedOwner = ''
   removeOwner = ''
   @State(state => state.projectInfo) projectInfo: any
+
   @State(state => state.user) userInfo: any
   @State(state => state.projectList) projectList: any
   currentDate:Date = new Date()
@@ -215,8 +217,11 @@ export default class Project extends Vue {
   }
 
   @Watch('projectInfo', { deep: true })
-  watchProjectInfo (value: any) {
-    this.updatedProjectInfo = value
+  watchProjectInfo (newVal: any, oldVal: any) {
+    if (!this.firstInit) {
+      this.initialProjectInfo = JSON.parse(JSON.stringify(this.projectInfo))
+      this.firstInit = true
+    }
   }
 
   @Watch('projectList', { deep: true })
@@ -226,7 +231,6 @@ export default class Project extends Vue {
   }
 
   mounted () {
-    this.initialProjectInfo = this.projectInfo
     $('.selectpicker').selectpicker('refresh')
     this.createdProject.projectName = ''
     this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
@@ -240,18 +244,45 @@ export default class Project extends Vue {
   }
 
   updateProjectInfo () {
-    if (this.updatedProjectInfo !== null) {
-      this.$store.dispatch('updateProjectInfo', this.updatedProjectInfo)
-      this.initialProjectInfo = this.updatedProjectInfo
-      console.log('project.updateProjectInfo', this.updatedProjectInfo)
-      this.updatedProjectInfo = null
+    if (this.initialProjectInfo !== null) {
+      // this.$store.dispatch('updateProjectInfo', this.projectInfo)
+      if (this.hasUpdateOwner === true) {
+        let insertList: Array<string> = []
+        let removeList: Array<string> = []
+        console.log(this.initialProjectInfo.projectOwner, this.projectInfo.projectOwner)
+        this.projectInfo.projectOwner.forEach((element: any) => {
+          console.log('1', element, this.initialProjectInfo.projectOwner.indexOf(element))
+          if (this.initialProjectInfo.projectOwner.indexOf(element) === -1) {
+            insertList.splice(0, 0, element)
+          }
+        })
+        this.initialProjectInfo.projectOwner.forEach((element: any) => {
+          console.log('2', element, this.projectInfo.projectOwner.indexOf(element))
+          if (this.projectInfo.projectOwner.indexOf(element) === -1) {
+            removeList.splice(0, 0, element)
+          }
+        })
+        console.log(insertList, removeList)
+        this.$store.dispatch('updateProjectOwner', {
+          id: this.projectInfo.id,
+          insert: insertList,
+          remove: removeList
+        })
+
+        this.hasUpdateOwner = false
+      }
+
+      this.initialProjectInfo = JSON.parse(JSON.stringify(this.projectInfo))
       alert('successfully update')
     }
   }
 
   resetProjectInfo () {
-    this.$store.dispatch('updateProjectInfo', this.initialProjectInfo)
-    this.updatedProjectInfo = null
+    this.projectInfo.startDate = this.initialProjectInfo.startDate
+    this.projectInfo.releaseDate = this.initialProjectInfo.releaseDate
+    this.projectInfo.projectOwner = this.initialProjectInfo.projectOwner
+    this.projectInfo.projectName = this.initialProjectInfo.projectName
+
     console.log('project.resetProjectInfo')
     alert('successfully reset')
   }
@@ -273,10 +304,13 @@ export default class Project extends Vue {
   }
 
   test () {
-    console.log('project.test: ', this.projectInfo)
+    console.log('project.test: ', this.initialProjectInfo)
   }
 
   addOwnerCallback () {
+    if (this.hasUpdateOwner === false) {
+      this.hasUpdateOwner = true
+    }
     if (!this.projectInfo.projectOwner.includes(this.addedOwner)) {
       this.projectInfo.projectOwner.splice(this.projectInfo.projectOwner.length, 0, this.addedOwner)
     } else {
@@ -285,7 +319,9 @@ export default class Project extends Vue {
   }
 
   removeOwnerCallback () {
-    // [].includes
+    if (this.hasUpdateOwner === false) {
+      this.hasUpdateOwner = true
+    }
     if (!this.projectInfo.projectOwner.includes(this.removeOwner)) {
       console.log('project.removeOwnerCallback: owner doesn\'t exist')
     } else {

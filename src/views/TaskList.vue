@@ -580,7 +580,9 @@ export default class TaskList extends Vue {
     let parentTaskId = input.value
 
     let today = new Date()
-    let daystring = today.toJSON().substr(0, 10)
+    let startstring = today.toJSON().substr(0, 10)
+    today.setDate(today.getDate() + 2)
+    let endstring = today.toJSON().substr(0, 10)
 
     let newTaskId: string = ''
     let parentIdArray = parentTaskId.split('-')
@@ -609,8 +611,8 @@ export default class TaskList extends Vue {
       taskId: newTaskId,
       title: 'new title',
       type: 'Hello',
-      start: daystring,
-      end: daystring,
+      start: startstring,
+      end: endstring,
       time: 0,
       managers: [],
       progress: 0

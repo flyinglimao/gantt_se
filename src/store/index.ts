@@ -109,6 +109,8 @@ export default new Vuex.Store<any>({
             startDate: '2019-12-1',
             releaseDate: '2020-2-25'
           })
+        } else {
+          console.log(doc.data())
         }
       })
       context.unbindFirestoreRef('projectInfo')
@@ -120,6 +122,36 @@ export default new Vuex.Store<any>({
         .collection('projectInfo')
         .doc(docId)
         .set(commit)
+    },
+    updateProjectOwner: (_, commit) => {
+      console.log(commit)
+      let docId = commit.id
+      let insert = commit.insert
+      let remove = commit.remove
+      let refdoc = db.collection('projectInfo').doc(docId)
+
+      insert.forEach((element: any) => {
+        let userProjectList = db.collection('projectList')
+          .doc(element)
+          .set({ projectList: firebase.firestore.FieldValue.arrayUnion(refdoc) }, { merge: true })
+      })
+      remove.forEach((element: any) => {
+        let userProjectList = db.collection('projectList')
+          .doc(element)
+          .set({ projectList: firebase.firestore.FieldValue.arrayRemove(refdoc) }, { merge: true })
+      })
+
+      // let ref = db.collection('projectList').doc('imbigking@gmail.com')
+      // ref.get().then(res => {
+      //   if (!res.exists) {
+      //     ref.set({ projectList: [ref] })
+      //   } else {
+      //     let projectListData:any = res.data()
+      //     projectListData.projectList.splice(0, 0, refdoc)
+
+      //     ref.set(projectListData)
+      //   }
+      // })
     },
     updateTaskList: (_, commit) => {
       let docId = commit.id
@@ -135,6 +167,8 @@ export default new Vuex.Store<any>({
         if (!doc.exists) {
           ref.set({ projectList: [] })
           console.log('not exist')
+        } else {
+          console.log(doc.data())
         }
       })
       return _.bindFirestoreRef('projectList', ref)
