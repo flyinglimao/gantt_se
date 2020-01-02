@@ -47,17 +47,21 @@
         </div>
         <hr>
         <div class="card p-2">
-          <div class="card-content">
-            <p class="font-weight-bold mb-0">Project List</p>
-            <table class="table table-sm">
-              <tr v-for="project in projectList.projectList" :key="project.id">
-                <td>{{ project.projectName }}</td>
-              </tr>
-            </table>
+          <div class="card-content" >
+            <template v-if="projectList !== null && projectList !== undefined">
+              <p class="font-weight-bold mb-0">Project List</p>
+              <select class="selectpicker" >
+                <option v-for="project in projectList.projectList" :key="project.id" :value="project.id">
+                  {{ project.projectName }}
+                </option>
+              </select>
+            </template>
+            <template v-else>
+              <p class="font-weight-bold mb-0">Login to get your project list</p>
+            </template>
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="modal fade" id="addNewOwnerModal" tabindex="-1" role="dialog" aria-labelledby="addNewOwnerModalLongTitle" aria-hidden="true">
@@ -178,6 +182,12 @@ export default class Project extends Vue {
     this.updatedProjectInfo = value
   }
 
+  @Watch('projectList', { deep: true })
+  watchProjectList (value: any) {
+    $('.selectpicker').selectpicker('refresh')
+    console.log('project.watchProjectList: ', this.projectList)
+  }
+
   mounted () {
     this.initialProjectInfo = this.projectInfo
     $('.selectpicker').selectpicker('refresh')
@@ -187,12 +197,9 @@ export default class Project extends Vue {
     this.createdProject.releaseDate = this.currentDate.toJSON().substr(0, 10)
   }
 
-  created () {
-    console.log('create')
-  }
-
-  destry () {
-    console.log('destroy')
+  updated () {
+    console.log('project.updated')
+    $('.selectpicker').selectpicker('refresh')
   }
 
   updateProjectInfo () {
@@ -200,7 +207,7 @@ export default class Project extends Vue {
       this.$store.dispatch('updateProjectInfo', this.updatedProjectInfo)
       this.initialProjectInfo = this.updatedProjectInfo
       this.updatedProjectInfo = null
-      console.log('update project info')
+      console.log('project.updateProjectInfo')
       alert('successfully update')
     }
   }
@@ -208,7 +215,7 @@ export default class Project extends Vue {
   resetProjectInfo () {
     this.$store.dispatch('updateProjectInfo', this.initialProjectInfo)
     this.updatedProjectInfo = null
-    console.log('reset project info')
+    console.log('project.resetProjectInfo')
     alert('successfully reset')
   }
 
@@ -229,7 +236,7 @@ export default class Project extends Vue {
   }
 
   test () {
-    console.log(this.projectList)
+    console.log('project.test: ', this.userInfo)
   }
 }
 

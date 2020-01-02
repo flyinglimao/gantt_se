@@ -7,7 +7,7 @@
         </form>
         <table class="table table-striped table-responsive main-table">
           <thead>
-            <th style="min-width: 2em"><input type="checkbox" class="checkbox"></th>
+            <th style="min-width: 2em"><input class="checkbox" type="radio" :value="'x'" name="select" checked></th>
             <th>#</th>
             <th style="min-width: 3em">State</th>
             <th class="col">Title</th>
@@ -15,7 +15,7 @@
             <th style="min-width: 5em">Type</th>
             <th style="min-width: 8em">Start</th>
             <th style="min-width: 8em">End</th>
-            <th style="min-width: 7em">Time</th>
+            <th style="min-width: 8em">Time</th>
             <th style="min-width: 3em">Progress</th>
             <th>Delete</th>
           </thead>
@@ -23,7 +23,7 @@
                  @focusout="finishCallback($event)">
             <template v-for="(item) in filteredTaskList">
             <tr :key="item.taskId" :id="item.taskId">
-              <td style="min-width: 2em"><input type="checkbox" class="checkbox"></td>
+              <td style="min-width: 2em"><input class="checkbox" type="radio" :value="item.taskId" name="select"></td>
               <td class="col-dropdown" @click="toggleSubTable($event, item.taskId)"><span class="arrow" :id="'span' + item.taskId" ><span></span><span></span></span></td>
               <td class="col-state noselect" @click="toggleState(item)"><span :class="'state-' + state[item.state - 1]" >●</span></td>
               <td class="col-title">
@@ -49,7 +49,7 @@
                 <label :for="'end' + item.taskId">{{item.end}}</label>
               </td>
               <td class="col-day">
-                {{ moment(item.start).to(item.end) }}
+                {{ moment(item.end).fromNow() }}
               </td>
               <td class="col-progress">
                 <input class="form-control" v-model="item.progress" type="text" :id="'progress' + item.taskId">
@@ -67,11 +67,11 @@
             </tr>
 
             <tr :key="'sub'+item.taskId" :id="'sub'+item.taskId" hidden>
-              <td  colspan="10" class="sub-table">
+              <td  colspan="11" class="sub-table">
                 <table>
                   <template v-for="(subItem) in getSubTaskList(item)">
                   <tr  :key="subItem.taskId" :id="subItem.taskId">
-                    <td><input type="checkbox" class="checkbox"></td>
+                    <td><input class="checkbox" type="radio" name="select" :value="subItem.taskId"></td>
                     <td class="col-dropdown" @click="toggleSubSubTable($event, subItem.taskId)"><span class="arrow"><span></span><span></span></span></td>
                     <td class="col-state noselect" @click="toggleState(subItem)"><span :class="'state-' + state[subItem.state - 1]" >●</span></td>
                     <td class="col-title">
@@ -97,7 +97,7 @@
                       <label :for="'end' + subItem.taskId">{{subItem.end}}</label>
                     </td>
                     <td class="col-day">
-                      {{ moment(subItem.start).to(subItem.end) }}
+                      {{ moment(item.end).fromNow() }}
                     </td>
                     <td class="col-progress">
                       <input class="form-control" v-model="subItem.progress" type="text" :id="'progress' + subItem.taskId">
@@ -115,10 +115,9 @@
                   </tr>
 
                   <tr :key="'subsub'+subItem.taskId"  :id="'subsub'+subItem.taskId" hidden>
-                    <td  colspan="10" class="subsub-table">
+                    <td  colspan="11" class="subsub-table">
                       <table >
                         <tr v-for="(subsubitem) in getSubSubTaskList(subItem)" :key="subsubitem.taskId">
-                          <td><input type="checkbox" class="checkbox"></td>
                           <td class="col-state noselect" @click="toggleState(subsubitem)"><span :class="'state-' + state[subsubitem.state - 1]" >●</span></td>
                           <td class="col-title">
                             <input class="form-control" style="text-align: center;width: 100%" v-model="subsubitem.title" type="text" :id="'title' + subsubitem.taskId">
@@ -143,7 +142,7 @@
                             <label :for="'end' + subsubitem.taskId">{{subsubitem.end}}</label>
                           </td>
                           <td class="col-day">
-                            {{ moment(subsubitem.start).to(subsubitem.end) }}
+                            {{ moment(item.end).fromNow() }}
                           </td>
                           <td class="col-progress">
                             <input class="form-control" v-model="subsubitem.progress" type="text" :id="'progress' + subsubitem.taskId">
@@ -195,41 +194,24 @@
             </div>
           </div>
         </div>
-        <button @click="createTaskCallback()" class="btn btn-light">+ Add new task/milestone</button>
-        <button  class="btn btn-light" >Store Task</button>
 
       </div>
       <div class="col-2 border-left">
         <div class="btn-group-vertical w-100 mt-2">
           <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#exampleModalLong">Add new member</button>
-          <button class="btn btn-outline-dark w-100">Add comment</button>
-          <button class="btn btn-outline-dark w-100">Add submission</button>
-        </div>
-        <hr>
-        <div class="card p-2">
-          <div class="card-content">
-            <p class="font-weight-bold mb-0">Mission Content</p>
-            <table class="table table-sm">
-              <tr>
-                <td>Total Members</td>
-                <td>{{ numberOfMember }}</td>
-              </tr>
-              <tr>
-                <td>Total Day Remain</td>
-                <td>99</td>
-              </tr>
-              <tr>
-                <td>Total Day Duration</td>
-                <td>123</td>
-              </tr>
-            </table>
-          </div>
+          <button class="btn btn-outline-dark w-100" @click="addMissionCallback">Add mission</button>
+          <button class="btn btn-outline-dark w-100" @click="storeTaskCallback">Store mission</button>
+
         </div>
         <hr>
         <div class="card p-2">
           <div class="card-content">
             <p class="font-weight-bold mb-0">Project Information</p>
             <table class="table table-sm">
+              <tr>
+                <td>Total Members</td>
+                <td>{{ numberOfMember }}</td>
+              </tr>
               <tr>
                 <td>Total Day Elapsed</td>
                 <td>{{ numberOfDateElapse }}</td>
@@ -253,6 +235,8 @@
 <style lang="scss" scoped>
 .checkbox {
   display: inline !important;
+  width: auto;
+  height: auto;
 }
 
 .row {
@@ -324,7 +308,7 @@ td:not(:nth-child(3)), th {
       background-color: rgba(0,0,0,0);
     }
   }
-  height: 70%;
+  height: 80%;
   min-height: 700px;
   overflow-y: scroll;
 
@@ -395,6 +379,7 @@ td.editing  {
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 import moment from 'moment'
+import store from '../store'
 
 declare let $: any
 
@@ -406,10 +391,12 @@ export default class TaskList extends Vue {
   @State(state => state.projectInfo.tasks) taskList!: Array<any>
   @State('projectInfo') projectInfo!: any
   private searchString: string = ''
-
+  private updatedProject: any = null
+  private currentDate: Date = new Date()
   @Watch('taskList', { deep: true })
   updateTaskList (value: any) {
-    this.$store.dispatch('updateTaskList', value)
+    this.updatedProject = value
+    // this.$store.dispatch('updateTaskList', value)
   }
 
   @Watch('projectInfo', { deep: true })
@@ -428,6 +415,10 @@ export default class TaskList extends Vue {
 
   mounted () {
     $('.selectpicker').selectpicker('refresh')
+  }
+
+  test (a: any, b: any) {
+    console.log(a, b)
   }
 
   get filteredTaskList () {
@@ -466,7 +457,7 @@ export default class TaskList extends Vue {
     let parentId = parentItem.taskId
     return this.taskList.filter(x => {
       let arr = x.taskId.split('-')
-      if (arr.length === 2 && arr[1] === parentId.toString()) {
+      if (arr.length === 2 && arr[0] === parentId.toString()) {
         return true
       } else {
         return false
@@ -577,10 +568,35 @@ export default class TaskList extends Vue {
     this.taskList.splice(destroyIndex, 1)
   }
 
-  createTaskCallback () {
+  addMissionCallback () {
+    let input = document.querySelector('input[name="select"]:checked') as HTMLInputElement
+    let parentTaskId = input.value
+
     let today = new Date()
-    let daystring = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
-    let newTaskId = this.taskList.length.toString()
+    let daystring = today.toJSON().substr(0, 10)
+
+    let newTaskId: string = ''
+    let parentIdArray = parentTaskId.split('-')
+
+    if (parentTaskId === 'x') {
+      let size = this.taskList.filter((element) => {
+        return element.taskId.split('-').length === 1
+      }).length + 1
+      newTaskId = size.toString()
+    } else if (parentIdArray.length === 1) {
+      let size = this.taskList.filter((element) => {
+        let tmp = element.taskId.split('-')
+        return tmp.length === 2 && `${tmp[0]}` === parentTaskId
+      }).length + 1
+      newTaskId = parentTaskId + '-' + size
+    } else if (parentIdArray.length === 2) {
+      let size = this.taskList.filter((element) => {
+        let tmp = element.taskId.split('-')
+        return tmp.length === 3 && `${tmp[0]}-${tmp[1]}` === parentTaskId
+      }).length + 1
+      newTaskId = parentTaskId + '-' + size
+    }
+
     let task = {
       state: 1,
       taskId: newTaskId,
@@ -593,7 +609,7 @@ export default class TaskList extends Vue {
       progress: 0
     }
     console.log(task)
-    // this.taskList.push(task)
+    this.taskList.push(task)
   }
 
   addMemberCallback () {
@@ -601,6 +617,12 @@ export default class TaskList extends Vue {
     let member = input.value
     this.projectInfo.teamMember.push(member)
     input.value = ''
+  }
+
+  storeTaskCallback () {
+    if (this.updatedProject !== null) {
+      this.$store.dispatch('updateTaskList', this.updatedProject)
+    }
   }
 }
 </script>

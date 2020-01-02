@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg justify-content-between">
       <a class="navbar-brand text-dark" href="#">
           <img src="../assets/logo.png" width="30" height="30">
-          <span> Project Supervisor</span>
+          <span @click="test"> Project Supervisor</span>
           <span>我就爛阿</span>
       </a>
       <ul class="navbar-nav float-right">
@@ -39,7 +39,7 @@
                       <i class="fa fa-facebook fa-fw"></i>
                     </a>
                   </div>
-                  <div class="form loginBox">
+                  <div class="form loginBox" v-if="displayName">
                     <button class="btn btn-default btn-login" @click="logout">Logout</button>
                   </div>
                 </div>
@@ -307,6 +307,10 @@ export default class Header extends Vue {
   @State(state => state.projectInfo.projectName) projectName: any
   @State(state => state.user.name) displayName: any
   @State(state => state.user.email) email: any
+  @Watch('displayName')
+  logSomeChange (value: any) {
+    console.log('header.logSomeChange: user change', value)
+  }
 
   login (providerType: string) {
     let authProvider: any
@@ -330,8 +334,6 @@ export default class Header extends Vue {
 
     if (authProvider !== null) {
       firebase.auth().signInWithPopup(authProvider).then(res => {
-        this.email = res.user !== null && res.user.hasOwnProperty('email') ? res.user.email : null
-        // this.$store.dispatch('bindProjectList', this.email)
         $('#loginModal').modal('hide')
       })
     }
@@ -341,12 +343,17 @@ export default class Header extends Vue {
     let authProvider = new firebase.auth.FacebookAuthProvider()
 
     firebase.auth().signOut().then(res => {
-      this.displayName = null
-      this.email = null
+      store.commit('updateUser', {
+        uid: null,
+        displayName: null,
+        email: null
+      })
       $('#loginModal').modal('hide')
-      this.$nextTick()
-      console.log(res)
+      console.log('header.logout: response', res)
     })
+  }
+  test () {
+    console.log(this.displayName)
   }
 }
 </script>
