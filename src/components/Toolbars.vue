@@ -10,10 +10,7 @@
             <router-link class="nav-link" to="gantt" active-class="active">Gantt Chart</router-link>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Save</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Export</a>
+            <a class="nav-link" @click="exportProject()">Export</a>
         </li>
     </ul>
 </template>
@@ -35,9 +32,21 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { State } from 'vuex-class'
 
 @Component
 export default class Toolbars extends Vue {
-  @Prop() private msg!: string;
+  @State('projectInfo') projectInfo!: any
+
+  exportProject () {
+    let a = document.createElement('a')
+    let blob = new Blob([JSON.stringify(this.projectInfo)], { type: 'application/json' })
+    a.download = 'project.json'
+    a.href = window.URL.createObjectURL(blob)
+    a.hidden = true
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+  }
 }
 </script>

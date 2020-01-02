@@ -24,7 +24,7 @@
           </tr>
           <tr>
             <td>Progress</td>
-            <td>{{ progress }}</td>
+            <td>{{ progress }}%</td>
           </tr>
         </table>
       </div>
@@ -146,7 +146,7 @@ export default class GanttChart extends Vue {
       .enter().append('rect')
       .attr('x', (d: any) => Math.max(xScale(scrubTime(d.start)) + 120, 120))
       .attr('y', (d: any, i: number) => yScale(i * 30) + 43)
-      .attr('width', (d: any) => xScale(scrubTime(d.end)) + 120 - Math.max(xScale(scrubTime(d.start)) + 120, 120))
+      .attr('width', (d: any) => Math.max(0, xScale(scrubTime(d.end)) + 120 - Math.max(xScale(scrubTime(d.start)) + 120, 120)))
       .attr('height', (d: any) => 0.8 * yScale(30))
       .attr('style', 'fill:rgb(255, 153, 51)')
 
@@ -241,12 +241,18 @@ export default class GanttChart extends Vue {
     let x, y, s
     svg.call(d3.zoom()
       .scaleExtent([0.1, 10])
-      .translateExtent([[0, 0], [width, height]])
       .extent([[0, 0], [width, height]])
       .on('zoom', function () {
         self.xScale = d3.event.transform.rescaleX(xScale)
         self.updateChart()
       }))
+
+    svg.call(d3.drag()
+      .container(svg.node())
+      .on('drag', function (this: HTMLElement, d: any) {
+        console.log(d)
+      })
+    )
   }
 }
 </script>
