@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex, { Store } from 'vuex'
 import { vuexfireMutations, firestoreAction } from 'vuexfire'
 import firebase from 'firebase'
 import 'firebase/firestore'
@@ -49,19 +49,23 @@ export default new Vuex.Store<any>({
         { state: 1, taskId: '2-2-1', title: '4--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
         { state: 1, taskId: '3-1-1', title: '5--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 }
       ],
-      startDate: (new Date('2019-12-1')),
-      releaseDate: (new Date('2020-2-25'))
+      startDate: '2019-12-01',
+      releaseDate: '2020-2-25'
     },
     user: {
       id: null,
-      name: null
-    }
+      name: null,
+      email: null
+    },
+    projectList: []
   },
   mutations: {
     ...vuexfireMutations,
     updateUser (state, user) {
+      console.log('store.updateUser')
       state.user.id = user.uid
       state.user.name = user.displayName
+      state.user.email = user.email
     }
   },
   actions: {
@@ -120,10 +124,45 @@ export default new Vuex.Store<any>({
         .doc('test')
         .update({ tasks: commit })
     },
+
+    bindProjectList: firestoreAction(async (_, email) => {
+      let ref = db.collection('projectList').doc(email)
+      ref.get().then(doc => {
+        if (!doc.exists) {
+          ref.set({ projectList: [] })
+          console.log('not exist')
+        }
+      })
+      return _.bindFirestoreRef('projectList', ref)
+    }),
+    unbindProjectList: firestoreAction(async (_) => {
+      return _.unbindFirestoreRef('projectList')
+    }),
+
+    addProjectInfo: (_, commit) => {
+      return db.collection('projectInfo').add(commit)
+    },
     auth: (store, commit) => {
       firebase.auth().onAuthStateChanged(user => {
+        console.log('store.auth auth change', user)
         if (user) {
-          store.commit('updateUser', user)
+          store.commit('updateUser', {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email
+          })
+          store.dispatch('bindProjectList', user.email).then(() => {
+            console.log('store.auth: finish bindProjectList', store.state.projectList)
+          })
+        } else {
+          store.commit('updateUser', {
+            uid: null,
+            displayName: null,
+            email: null
+          })
+          store.dispatch('unbindProjectList').then(() => {
+            console.log('store.auth: finish unbindProjectList', store.state.projectList)
+          })
         }
       })
     }
