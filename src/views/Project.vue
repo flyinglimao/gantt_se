@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row justify-content-center">
       <div class="top-15 col-10">
-      <form role="form" class="col-8 justify-content-center" id="projectForm" >
+      <form role="form" class="col-8 justify-content-center" id="projectForm" v-if="projectInfo !== null">
         <h2 style="text-align: center" @click="test">Project Information</h2>
         <div class="form-group">
           <div class="row justify-content-center">
@@ -38,20 +38,29 @@
           </div>
         </div>
       </form>
+      <h1 v-else-if="userInfo === null" style="text-align: center">
+        Login and select a project in project list
+      </h1>
+      <h1 v-else style="text-align: center">
+        Select a project in project list or create new project
+      </h1>
     </div>
 
     <div class="col-2 border-left">
         <div class="btn-group-vertical w-100 mt-2">
-          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#addNewOwnerModal">Add new owner</button>
-          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#createProjectModal">Create new project</button>
+          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#addNewOwnerModal" :disabled="userInfo === null || projectInfo === null">Add new owner</button>
+          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#removeOwnerModal" :disabled="userInfo === null || projectInfo === null">Remove old owner</button>
+          <button class="btn btn-outline-dark w-100" data-toggle="modal" data-target="#createProjectModal" :disabled="userInfo === null">Create new project</button>
         </div>
         <hr>
         <div class="card p-2">
           <div class="card-content" >
             <template v-if="projectList !== null && projectList !== undefined">
               <p class="font-weight-bold mb-0">Project List</p>
-              <select class="selectpicker" >
-                <option v-for="project in projectList.projectList" :key="project.id" :value="project.id">
+              <select class="selectpicker" @change="getProjectInfo($event)">
+                <option style="display:none"></option>
+                <option v-for="project in projectList.projectList" :selected="projectInfo !== null && projectInfo.id === project.id"
+                :key="project.id" :value="project.id">
                   {{ project.projectName }}
                 </option>
               </select>
@@ -68,7 +77,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="addNewOwnerModalTitle">Create Project</h5>
+            <h5 class="modal-title" id="addNewOwnerModalTitle">Add Project Owner</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -77,13 +86,38 @@
             <div class="column">
               <div class="row justify-content-center">
                 <label for="addOwner" class="col-2" style="line-height: 2">Email: </label>
-                <input type="email" class="form-control col-5" id="addOwner">
+                <input type="email" class="form-control col-5" id="addOwner" v-model="addedOwner">
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="addOwnerCallback()">Add Owner</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="addOwnerCallback">Add Owner</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="removeOwnerModal" tabindex="-1" role="dialog" aria-labelledby="removeOwnerModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="removeOwnerModalTitle">Remove Project Owner</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="column">
+              <div class="row justify-content-center">
+                <label for="removeOwner" class="col-2" style="line-height: 2">Email: </label>
+                <input type="email" class="form-control col-5" id="removeOwner" v-model="removeOwner">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="removeOwnerCallback">Remove Owner</button>
           </div>
         </div>
       </div>
@@ -158,12 +192,15 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+import store from '../store'
 declare let $: any
 
 @Component
 export default class Project extends Vue {
   private updatedProjectInfo: any
   private initialProjectInfo: any
+  addedOwner = ''
+  removeOwner = ''
   @State(state => state.projectInfo) projectInfo: any
   @State(state => state.user) userInfo: any
   @State(state => state.projectList) projectList: any
@@ -206,8 +243,8 @@ export default class Project extends Vue {
     if (this.updatedProjectInfo !== null) {
       this.$store.dispatch('updateProjectInfo', this.updatedProjectInfo)
       this.initialProjectInfo = this.updatedProjectInfo
+      console.log('project.updateProjectInfo', this.updatedProjectInfo)
       this.updatedProjectInfo = null
-      console.log('project.updateProjectInfo')
       alert('successfully update')
     }
   }
@@ -236,7 +273,31 @@ export default class Project extends Vue {
   }
 
   test () {
-    console.log('project.test: ', this.userInfo)
+    console.log('project.test: ', this.projectInfo)
+  }
+
+  addOwnerCallback () {
+    if (!this.projectInfo.projectOwner.includes(this.addedOwner)) {
+      this.projectInfo.projectOwner.splice(this.projectInfo.projectOwner.length, 0, this.addedOwner)
+    } else {
+      console.log('project.addOwnerCallback: owner already exist')
+    }
+  }
+
+  removeOwnerCallback () {
+    // [].includes
+    if (!this.projectInfo.projectOwner.includes(this.removeOwner)) {
+      console.log('project.removeOwnerCallback: owner doesn\'t exist')
+    } else {
+      let index = this.projectInfo.projectOwner.indexOf(this.removeOwner)
+      this.projectInfo.projectOwner.splice(index, 1)
+    }
+  }
+
+  getProjectInfo (e: Event) {
+    let select = e.currentTarget as HTMLSelectElement
+    let projectId = select.value
+    this.$store.dispatch('bindProjectInfo', projectId)
   }
 }
 

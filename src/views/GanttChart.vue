@@ -66,7 +66,7 @@ declare let d3: any
 
 @Component
 export default class GanttChart extends Vue {
-  @State(state => state.projectInfo.tasks) taskList!: Array<any>
+  @State(state => state.projectInfo.taskList) taskList!: Array<any>
   @State('projectInfo') projectInfo!: any
   private searchString: string = ''
   private lock: boolean = false

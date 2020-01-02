@@ -1,6 +1,8 @@
 <template>
   <div class="container-fluid">
-    <div class="row">
+    <div class="row justify-content-center">
+      <template v-if="projectInfo !== null && projectInfo !== undefined &&
+      taskList !== null && taskList !== undefined">
       <div class="col-10">
         <form onsubmit="false">
           <input type="text" class="form-control" placeholder="Search" v-model="searchString">
@@ -24,7 +26,7 @@
             <template v-for="(item) in filteredTaskList">
             <tr :key="item.taskId" :id="item.taskId">
               <td style="min-width: 2em"><input class="checkbox" type="radio" :value="item.taskId" name="select"></td>
-              <td class="col-dropdown" @click="toggleSubTable($event, item.taskId)"><span class="arrow" :id="'span' + item.taskId" ><span></span><span></span></span></td>
+              <td class="col-dropdown" @click="toggleSubTable($event, item.taskId)"><span class="arrow active" :id="'span' + item.taskId" ><span></span><span></span></span></td>
               <td class="col-state noselect" @click="toggleState(item)"><span :class="'state-' + state[item.state - 1]" >●</span></td>
               <td class="col-title">
                 <input class="form-control" style="text-align: center;width: 100%" v-model="item.title" type="text" :id="'title' + item.taskId">
@@ -66,13 +68,13 @@
               </td>
             </tr>
 
-            <tr :key="'sub'+item.taskId" :id="'sub'+item.taskId" hidden>
+            <tr :key="'sub'+item.taskId" :id="'sub'+item.taskId">
               <td  colspan="11" class="sub-table">
                 <table>
                   <template v-for="(subItem) in getSubTaskList(item)">
                   <tr  :key="subItem.taskId" :id="subItem.taskId">
                     <td><input class="checkbox" type="radio" name="select" :value="subItem.taskId"></td>
-                    <td class="col-dropdown" @click="toggleSubSubTable($event, subItem.taskId)"><span class="arrow"><span></span><span></span></span></td>
+                    <td class="col-dropdown" @click="toggleSubSubTable($event, subItem.taskId)"><span class="arrow active"><span></span><span></span></span></td>
                     <td class="col-state noselect" @click="toggleState(subItem)"><span :class="'state-' + state[subItem.state - 1]" >●</span></td>
                     <td class="col-title">
                       <input class="form-control" style="text-align: center;width: 100%" v-model="subItem.title" type="text" :id="'title' + subItem.taskId">
@@ -114,7 +116,7 @@
                     </td>
                   </tr>
 
-                  <tr :key="'subsub'+subItem.taskId"  :id="'subsub'+subItem.taskId" hidden>
+                  <tr :key="'subsub'+subItem.taskId"  :id="'subsub'+subItem.taskId">
                     <td  colspan="11" class="subsub-table">
                       <table >
                         <tr v-for="(subsubitem) in getSubSubTaskList(subItem)" :key="subsubitem.taskId">
@@ -228,6 +230,13 @@
           </div>
         </div>
       </div>
+      </template>
+      <div v-else class="row justify-content-center align-items-center">
+        <h1 @click="test(taskList);test(projectInfo)">
+          Login And Select A Project In Project Page
+        </h1>
+      </div>
+
     </div>
   </div>
 </template>
@@ -388,37 +397,32 @@ declare let $: any
 export default class TaskList extends Vue {
   private state = ['good', 'warn', 'bad']
 
-  @State(state => state.projectInfo.tasks) taskList!: Array<any>
-  @State('projectInfo') projectInfo!: any
+  @State(state => state.projectInfo) projectInfo!: any
+  @State(state => state.projectInfo.taskList) taskList!: Array<any>
   private searchString: string = ''
   private updatedProject: any = null
   private currentDate: Date = new Date()
-  @Watch('taskList', { deep: true })
-  updateTaskList (value: any) {
-    this.updatedProject = value
-    // this.$store.dispatch('updateTaskList', value)
-  }
-
   @Watch('projectInfo', { deep: true })
-  updateProjectInfo (value: any) {
-    this.$store.dispatch('updateProjectInfo', value)
+  updateProjectInfo (newVal: any) {
+    this.updatedProject = newVal
   }
 
-  // life hook
-  created () {
-    // moment.locale('zh-tw')
-  }
+  // @Watch('projectInfo', { deep: true })
+  // test2 (newVal: any, oldVal: any) {
+  //   console.log(newVal, oldVal)
+  // }
+
   // life hook
   updated () {
-    // $('.selectpicker').selectpicker('refresh')
+    $('.selectpicker').selectpicker('refresh')
   }
 
   mounted () {
     $('.selectpicker').selectpicker('refresh')
   }
 
-  test (a: any, b: any) {
-    console.log(a, b)
+  test (a: any) {
+    console.log(a)
   }
 
   get filteredTaskList () {
@@ -436,21 +440,24 @@ export default class TaskList extends Vue {
   }
 
   get numberOfDateElapse () {
-    let start = this.projectInfo.startDate.seconds
-    let result = (Date.now() / 1000 - start) / 86400
+    let start = new Date(this.projectInfo.startDate)
+    let end = new Date()
+    let result = (end.getTime() - start.getTime()) / 86400000
     return result.toFixed(0)
   }
 
   get numberOfDateRemain () {
-    let end = this.projectInfo.releaseDate
-    let result = (end.seconds - Date.now() / 1000) / 86400
+    let start = new Date()
+    let end = new Date(this.projectInfo.releaseDate)
+    let result = (end.getTime() - start.getTime()) / 86400000
     return result.toFixed(0)
   }
 
   get numberOfTotalDay () {
-    let start = this.projectInfo.startDate.seconds
-    let end = this.projectInfo.releaseDate.seconds
-    return (end - start) / 86400
+    let start = new Date(this.projectInfo.startDate)
+    let end = new Date(this.projectInfo.releaseDate)
+    let result = (end.getTime() - start.getTime()) / 86400000
+    return result.toFixed(0)
   }
 
   getSubTaskList (parentItem: any) {
@@ -621,7 +628,7 @@ export default class TaskList extends Vue {
 
   storeTaskCallback () {
     if (this.updatedProject !== null) {
-      this.$store.dispatch('updateTaskList', this.updatedProject)
+      this.$store.dispatch('updateProjectInfo', this.updatedProject)
     }
   }
 }

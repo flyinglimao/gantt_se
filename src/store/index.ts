@@ -18,40 +18,41 @@ Vue.use(Vuex)
 
 export default new Vuex.Store<any>({
   state: {
-    projectInfo: {
-      projectName: '我就爛',
-      projectOwner: [
-        '捷哥',
-        '世雄',
-        '宇宸',
-        '潘瑨'
-      ],
-      teamMember: [ // will be changed to email
-        '捷哥',
-        '世雄',
-        '宇宸',
-        '潘瑨',
-        '米卡狗'
-      ],
-      tasks: [
-        { state: 1, taskId: '1', title: '捷哥是在哈搂???', managers: ['捷哥'], type: 'Hello', start: '2019-12-06', end: '2019-12-12', progress: 0 },
-        { state: 1, taskId: '2', title: '世雄是在哈搂???', managers: ['世雄'], type: 'Hello', start: '2019-12-06', end: '2019-12-17', progress: 50 },
-        { state: 1, taskId: '3', title: '宇宸是在哈搂???', managers: ['宇宸'], type: 'Hello', start: '2019-12-06', end: '2019-12-19', progress: 75 },
-        { state: 1, taskId: '4', title: '潘瑨是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '1-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '1-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '2-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '2-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '3-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '1-1-1', title: '1--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '1-2-1', title: '2--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '2-1-1', title: '3--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '2-2-1', title: '4--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
-        { state: 1, taskId: '3-1-1', title: '5--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 }
-      ],
-      startDate: '2019-12-01',
-      releaseDate: '2020-2-25'
-    },
+    projectInfo: null,
+    // projectInfo: {
+    //   projectName: '我就爛',
+    //   projectOwner: [
+    //     '捷哥',
+    //     '世雄',
+    //     '宇宸',
+    //     '潘瑨'
+    //   ],
+    //   teamMember: [ // will be changed to email
+    //     '捷哥',
+    //     '世雄',
+    //     '宇宸',
+    //     '潘瑨',
+    //     '米卡狗'
+    //   ],
+    //   tasks: [
+    //     { state: 1, taskId: '1', title: '捷哥是在哈搂???', managers: ['捷哥'], type: 'Hello', start: '2019-12-06', end: '2019-12-12', progress: 0 },
+    //     { state: 1, taskId: '2', title: '世雄是在哈搂???', managers: ['世雄'], type: 'Hello', start: '2019-12-06', end: '2019-12-17', progress: 50 },
+    //     { state: 1, taskId: '3', title: '宇宸是在哈搂???', managers: ['宇宸'], type: 'Hello', start: '2019-12-06', end: '2019-12-19', progress: 75 },
+    //     { state: 1, taskId: '4', title: '潘瑨是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '1-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '1-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '2-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '2-2', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '3-1', title: '-米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '1-1-1', title: '1--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '1-2-1', title: '2--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '2-1-1', title: '3--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '2-2-1', title: '4--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 },
+    //     { state: 1, taskId: '3-1-1', title: '5--米卡狗是在哈搂???', managers: ['潘瑨'], type: 'Hello', start: '2019-12-06', end: '2019-12-26', progress: 89 }
+    //   ],
+    //   startDate: '2019-12-01',
+    //   releaseDate: '2020-2-25'
+    // },
     user: {
       id: null,
       name: null,
@@ -69,8 +70,8 @@ export default new Vuex.Store<any>({
     }
   },
   actions: {
-    bindProjectInfo: firestoreAction(async (context) => {
-      let ref = db.collection('projectInfo').doc('test')
+    bindProjectInfo: firestoreAction(async (context, id) => {
+      let ref = db.collection('projectInfo').doc(id)
 
       ref.get().then(doc => {
         if (!doc.exists) {
@@ -110,19 +111,22 @@ export default new Vuex.Store<any>({
           })
         }
       })
+      context.unbindFirestoreRef('projectInfo')
       return context.bindFirestoreRef('projectInfo', ref)
     }),
     updateProjectInfo: (_, commit) => {
+      let docId = commit.id
       return db
         .collection('projectInfo')
-        .doc('test')
+        .doc(docId)
         .set(commit)
     },
     updateTaskList: (_, commit) => {
+      let docId = commit.id
       return db
         .collection('projectInfo')
-        .doc('test')
-        .update({ tasks: commit })
+        .doc(docId)
+        .update({ taskList: commit.taskList })
     },
 
     bindProjectList: firestoreAction(async (_, email) => {
