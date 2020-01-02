@@ -14,7 +14,6 @@
             <th style="min-width: 3em">State</th>
             <th class="col">Title</th>
             <th style="min-width: 5em">Manager</th>
-            <th style="min-width: 5em">Type</th>
             <th style="min-width: 8em">Start</th>
             <th style="min-width: 8em">End</th>
             <th style="min-width: 8em">Time</th>
@@ -37,10 +36,6 @@
                   <option v-for="(member) in (projectInfo.teamMember)"
                   :value="member" :key="member"  :selected="item.managers.includes(member)">{{member}}</option>
                 </select>
-              </td>
-              <td class="col-type">
-                <input class="form-control"  v-model="item.type" type="text" :id="'type' + item.taskId">
-                <label :for="'type' + item.taskId" >{{item.type}}</label>
               </td>
               <td class="col-start">
                 <input class="form-control" v-model="item.start" type="date" :id="'start' + item.taskId" :max="item.end">
@@ -86,10 +81,6 @@
                         :value="member" :key="member"  :selected="subItem.managers.includes(member)">{{member}}</option>
                       </select>
                     </td>
-                    <td class="col-type">
-                      <input class="form-control"  v-model="subItem.type" type="text" :id="'type' + subItem.taskId">
-                      <label :for="'type' + subItem.taskId" >{{subItem.type}}</label>
-                    </td>
                     <td class="col-start">
                       <input class="form-control" v-model="subItem.start" type="date" :id="'start' + subItem.taskId" :max="subItem.end">
                       <label :for="'start' + subItem.taskId">{{subItem.start}}</label>
@@ -131,10 +122,6 @@
                               :value="member" :key="member"  :selected="subsubitem.managers.includes(member)">{{member}}</option>
                             </select>
                           </td>
-                          <td class="col-type">
-                            <input class="form-control"  v-model="subsubitem.type" type="text" :id="'type' + subsubitem.taskId">
-                            <label :for="'type' + subsubitem.taskId" >{{subsubitem.type}}</label>
-                          </td>
                           <td class="col-start">
                             <input class="form-control" v-model="subsubitem.start" type="date" :id="'start' + subsubitem.taskId" :max="subsubitem.end">
                             <label :for="'start' + subsubitem.taskId">{{subsubitem.start}}</label>
@@ -162,7 +149,6 @@
                         </tr>
                       </table>
                     </td>
-
                   </tr>
                   </template>
                 </table>
@@ -631,6 +617,7 @@ export default class TaskList extends Vue {
   storeTaskCallback () {
     if (this.updatedProject !== null) {
       this.$store.dispatch('updateProjectInfo', this.updatedProject)
+      alert('successfully update taskList')
     }
   }
 }

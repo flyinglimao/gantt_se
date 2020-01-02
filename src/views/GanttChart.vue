@@ -6,10 +6,10 @@
       <div class='col-3 border-left pt-3'>
         <h5>{{ title }}</h5>
         <table class='table table-sm'>
-          <tr>
+          <!-- <tr>
             <td>Type</td>
             <td>{{ type }}</td>
-          </tr>
+          </tr> -->
           <tr>
             <td>Start</td>
             <td>{{ start }}</td>

@@ -29,9 +29,9 @@
               <div class="box">
                 <div class="content">
                   <div class="social" v-if="!displayName">
-                    <a class="circle github" @click="login('github')" href="#">
+                    <!-- <a class="circle github" @click="login('github')" href="#">
                       <i class="fa fa-github fa-fw"></i>
-                    </a>
+                    </a> -->
                     <a id="google_login" class="circle google" @click="login('google')" href="#">
                       <i class="fa fa-google-plus fa-fw"></i>
                     </a>
