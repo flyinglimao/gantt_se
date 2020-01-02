@@ -9,9 +9,9 @@
         <li class="nav-item">
             <router-link class="nav-link" to="gantt" active-class="active">Gantt Chart</router-link>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
             <a class="nav-link" @click="exportProject()">Export</a>
-        </li>
+        </li> -->
     </ul>
 </template>
 
@@ -33,20 +33,33 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+declare let d3: any
+
+const d3ToPng = require('d3-svg-to-png')
 
 @Component
 export default class Toolbars extends Vue {
   @State('projectInfo') projectInfo!: any
 
   exportProject () {
-    let a = document.createElement('a')
-    let blob = new Blob([JSON.stringify(this.projectInfo)], { type: 'application/json' })
-    a.download = 'project.json'
-    a.href = window.URL.createObjectURL(blob)
-    a.hidden = true
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
+    // let a = document.createElement('a')
+    // let blob = new Blob([JSON.stringify(this.projectInfo)], { type: 'application/json' })
+    // a.download = 'project.json'
+    // a.href = window.URL.createObjectURL(blob)
+    // a.hidden = true
+    // document.body.appendChild(a)
+    // a.click()
+    // a.remove()
+
+    console.log(d3ToPng)
+    d3ToPng('svg', 'name.png', {
+      scale: 3,
+      format: 'png',
+      quality: 0.01,
+      download: true
+    }).then((fileData: any) => {
+      console.log(fileData)
+    })
   }
 }
 </script>

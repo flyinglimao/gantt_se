@@ -27,6 +27,8 @@
             <td>{{ progress }}%</td>
           </tr>
         </table>
+        <hr>
+        <button class="btn btn-info" @click="exportPng">Export</button>
       </div>
     </div>
     <div class='bar' style='display: none'></div>
@@ -61,6 +63,7 @@ button {
 <script lang='ts'>
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+const d3ToPng = require('d3-svg-to-png')
 
 declare let d3: any
 
@@ -89,6 +92,16 @@ export default class GanttChart extends Vue {
   beforeRouteEnter (to: string, from: string, next: Function) {
     next((vm: any) => {
       vm.updateChart()
+    })
+  }
+
+  exportPng () {
+    console.log(d3ToPng)
+    d3ToPng('svg', 'exportFile', {
+      scale: 3,
+      format: 'png',
+      quality: 0.9,
+      download: true
     })
   }
 
