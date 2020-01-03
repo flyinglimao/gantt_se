@@ -227,6 +227,16 @@ export default class Project extends Vue {
   @Watch('projectList', { deep: true })
   watchProjectList (value: any) {
     $('.selectpicker').selectpicker('refresh')
+    let tmpEle = document.querySelectorAll('div.bootstrap-select')
+    console.log(tmpEle)
+    if (tmpEle.length !== 1) {
+      for (let i = 0; i < tmpEle.length; i++) {
+        let targetSelect = tmpEle[i].firstElementChild as HTMLElement
+        if (targetSelect !== null && targetSelect.nodeName !== 'SELECT') {
+          tmpEle[0].remove()
+        }
+      }
+    }
     console.log('project.watchProjectList: ', this.projectList)
   }
 
@@ -245,7 +255,7 @@ export default class Project extends Vue {
 
   updateProjectInfo () {
     if (this.initialProjectInfo !== null) {
-      // this.$store.dispatch('updateProjectInfo', this.projectInfo)
+      this.$store.dispatch('updateProjectInfo', this.projectInfo)
       if (this.hasUpdateOwner === true) {
         let insertList: Array<string> = []
         let removeList: Array<string> = []
@@ -289,13 +299,19 @@ export default class Project extends Vue {
 
   createProjectCallback () {
     console.log(this.createdProject)
-    this.$store.dispatch('addProjectInfo', this.createdProject).then(docRef => {
-      console.log('docRef.id,', docRef.id, '\nprojectName: ', docRef.projectName)
 
-      this.createdProject.projectName = ''
-      this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
-      this.createdProject.startDate = this.currentDate.toJSON().substr(0, 10)
-      this.createdProject.releaseDate = this.currentDate.toJSON().substr(0, 10)
+    this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
+
+    this.$store.dispatch('addProjectInfo', this.createdProject).then(docRef => {
+      console.log('docRef', docRef, '; created poj', this.createdProject)
+      this.$store.dispatch('updateProjectOwner', {
+        id: docRef.id,
+        insert: [this.userInfo.email],
+        remove: []
+      })
+      this.$store.dispatch('bindProjectList', this.userInfo.email).then(res => {
+
+      })
     }).catch(err => {
       console.log(err)
     })

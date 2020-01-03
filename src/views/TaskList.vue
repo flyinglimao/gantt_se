@@ -555,10 +555,21 @@ export default class TaskList extends Vue {
   }
 
   deleteTaskCallback (taskId: string) {
-    let destroyIndex = this.taskList.findIndex(item => {
-      return item.taskId === taskId
+    let parentIdArray = taskId.split('-')
+    let destroyList = this.taskList.filter((element: any) => {
+      let taskIdArray = element.taskId.split('-')
+      for (let i = 0; i < parentIdArray.length; i++) {
+        if (taskIdArray.length >= parentIdArray.length && parentIdArray[i] === taskIdArray[i]) {
+          return true
+        }
+      }
     })
-    this.taskList.splice(destroyIndex, 1)
+    destroyList.forEach((ele: any) => {
+      let index = this.taskList.findIndex((e: any) => { return e.taskId === ele.taskId })
+      if (index !== -1) {
+        this.taskList.splice(index, 1)
+      }
+    })
   }
 
   addMissionCallback () {

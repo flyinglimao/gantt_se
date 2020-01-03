@@ -116,6 +116,9 @@ export default new Vuex.Store<any>({
       context.unbindFirestoreRef('projectInfo')
       return context.bindFirestoreRef('projectInfo', ref)
     }),
+    unbindProjectInfo: firestoreAction(async (_) => {
+      return _.unbindFirestoreRef('projectInfo')
+    }),
     updateProjectInfo: (_, commit) => {
       let docId = commit.id
       return db
@@ -124,7 +127,7 @@ export default new Vuex.Store<any>({
         .set(commit)
     },
     updateProjectOwner: (_, commit) => {
-      console.log(commit)
+      console.log('store.updateProjectOwner', commit)
       let docId = commit.id
       let insert = commit.insert
       let remove = commit.remove
@@ -171,6 +174,7 @@ export default new Vuex.Store<any>({
           console.log(doc.data())
         }
       })
+      // _.unbindFirestoreRef('projectList')
       return _.bindFirestoreRef('projectList', ref)
     }),
     unbindProjectList: firestoreAction(async (_) => {
@@ -200,6 +204,9 @@ export default new Vuex.Store<any>({
           })
           store.dispatch('unbindProjectList').then(() => {
             console.log('store.auth: finish unbindProjectList', store.state.projectList)
+          })
+          store.dispatch('unbindProjectInfo').then(() => {
+            console.log('store.auth: finish unbindProjectInfo', store.state.projectInfo)
           })
         }
       })
