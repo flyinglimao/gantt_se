@@ -8,7 +8,7 @@
       <ul class="navbar-nav float-right">
           <li class="nav-item" data-toggle="modal" data-target="#loginModal">
             <a class="nav-link" href="#" v-if="!displayName">Login</a>
-            <a class="nav-link" href="#" v-if="displayName">{{ displayName }}</a>
+            <a class="nav-link" href="#" v-if="displayName" :title="email">{{ displayName }}</a>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" :to="'contact'">Contact Information</router-link>
@@ -40,6 +40,8 @@
                     </a>
                   </div>
                   <div class="form loginBox" v-if="displayName">
+                    <h4>{{ email }}</h4>
+                    <hr>
                     <button class="btn btn-default btn-login" @click="logout">Logout</button>
                   </div>
                 </div>
