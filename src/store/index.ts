@@ -63,7 +63,6 @@ export default new Vuex.Store<any>({
   mutations: {
     ...vuexfireMutations,
     updateUser (state, user) {
-      console.log('store.updateUser')
       state.user.id = user.uid
       state.user.name = user.displayName
       state.user.email = user.email
@@ -109,8 +108,6 @@ export default new Vuex.Store<any>({
             startDate: '2019-12-1',
             releaseDate: '2020-2-25'
           })
-        } else {
-          console.log(doc.data())
         }
       })
       context.unbindFirestoreRef('projectInfo')
@@ -127,7 +124,6 @@ export default new Vuex.Store<any>({
         .set(commit)
     },
     updateProjectOwner: (_, commit) => {
-      console.log('store.updateProjectOwner', commit)
       let docId = commit.id
       let insert = commit.insert
       let remove = commit.remove
@@ -169,9 +165,6 @@ export default new Vuex.Store<any>({
       ref.get().then(doc => {
         if (!doc.exists) {
           ref.set({ projectList: [] })
-          console.log('not exist')
-        } else {
-          console.log(doc.data())
         }
       })
       // _.unbindFirestoreRef('projectList')
@@ -186,28 +179,21 @@ export default new Vuex.Store<any>({
     },
     auth: (store, commit) => {
       firebase.auth().onAuthStateChanged(user => {
-        console.log('store.auth auth change', user)
         if (user) {
           store.commit('updateUser', {
             uid: user.uid,
             displayName: user.displayName,
             email: user.email
           })
-          store.dispatch('bindProjectList', user.email).then(() => {
-            console.log('store.auth: finish bindProjectList', store.state.projectList)
-          })
+          store.dispatch('bindProjectList', user.email)
         } else {
           store.commit('updateUser', {
             uid: null,
             displayName: null,
             email: null
           })
-          store.dispatch('unbindProjectList').then(() => {
-            console.log('store.auth: finish unbindProjectList', store.state.projectList)
-          })
-          store.dispatch('unbindProjectInfo').then(() => {
-            console.log('store.auth: finish unbindProjectInfo', store.state.projectInfo)
-          })
+          store.dispatch('unbindProjectList')
+          store.dispatch('unbindProjectInfo')
         }
       })
     }

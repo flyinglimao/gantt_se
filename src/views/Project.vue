@@ -228,7 +228,6 @@ export default class Project extends Vue {
   watchProjectList (value: any) {
     $('.selectpicker').selectpicker('refresh')
     let tmpEle = document.querySelectorAll('div.bootstrap-select')
-    console.log(tmpEle)
     if (tmpEle.length !== 1) {
       for (let i = 0; i < tmpEle.length; i++) {
         let targetSelect = tmpEle[i].firstElementChild as HTMLElement
@@ -237,7 +236,6 @@ export default class Project extends Vue {
         }
       }
     }
-    console.log('project.watchProjectList: ', this.projectList)
   }
 
   mounted () {
@@ -249,7 +247,6 @@ export default class Project extends Vue {
   }
 
   updated () {
-    console.log('project.updated')
     $('.selectpicker').selectpicker('refresh')
   }
 
@@ -259,20 +256,16 @@ export default class Project extends Vue {
       if (this.hasUpdateOwner === true) {
         let insertList: Array<string> = []
         let removeList: Array<string> = []
-        console.log(this.initialProjectInfo.projectOwner, this.projectInfo.projectOwner)
         this.projectInfo.projectOwner.forEach((element: any) => {
-          console.log('1', element, this.initialProjectInfo.projectOwner.indexOf(element))
           if (this.initialProjectInfo.projectOwner.indexOf(element) === -1) {
             insertList.splice(0, 0, element)
           }
         })
         this.initialProjectInfo.projectOwner.forEach((element: any) => {
-          console.log('2', element, this.projectInfo.projectOwner.indexOf(element))
           if (this.projectInfo.projectOwner.indexOf(element) === -1) {
             removeList.splice(0, 0, element)
           }
         })
-        console.log(insertList, removeList)
         this.$store.dispatch('updateProjectOwner', {
           id: this.projectInfo.id,
           insert: insertList,
@@ -293,17 +286,13 @@ export default class Project extends Vue {
     this.projectInfo.projectOwner = this.initialProjectInfo.projectOwner
     this.projectInfo.projectName = this.initialProjectInfo.projectName
 
-    console.log('project.resetProjectInfo')
     alert('successfully reset')
   }
 
   createProjectCallback () {
-    console.log(this.createdProject)
-
     this.createdProject.projectOwner = [ this.userInfo ? this.userInfo.email : null ]
 
     this.$store.dispatch('addProjectInfo', this.createdProject).then(docRef => {
-      console.log('docRef', docRef, '; created poj', this.createdProject)
       this.$store.dispatch('updateProjectOwner', {
         id: docRef.id,
         insert: [this.userInfo.email],
@@ -320,7 +309,7 @@ export default class Project extends Vue {
   }
 
   test () {
-    console.log('project.test: ', this.initialProjectInfo)
+    // console.log('project.test: ', this.initialProjectInfo)
   }
 
   addOwnerCallback () {
@@ -329,8 +318,6 @@ export default class Project extends Vue {
     }
     if (!this.projectInfo.projectOwner.includes(this.addedOwner)) {
       this.projectInfo.projectOwner.splice(this.projectInfo.projectOwner.length, 0, this.addedOwner)
-    } else {
-      console.log('project.addOwnerCallback: owner already exist')
     }
   }
 

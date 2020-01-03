@@ -263,7 +263,6 @@ export default class GanttChart extends Vue {
     svg.call(d3.drag()
       .container(svg.node())
       .on('drag', function (this: HTMLElement, d: any) {
-        console.log(d)
       })
     )
   }

@@ -309,10 +309,6 @@ export default class Header extends Vue {
   @State(state => state.projectInfo.projectName) projectName: any
   @State(state => state.user.name) displayName: any
   @State(state => state.user.email) email: any
-  @Watch('displayName')
-  logSomeChange (value: any) {
-    console.log('header.logSomeChange: user change', value)
-  }
 
   login (providerType: string) {
     let authProvider: any
@@ -351,11 +347,10 @@ export default class Header extends Vue {
         email: null
       })
       $('#loginModal').modal('hide')
-      console.log('header.logout: response', res)
     })
   }
   test () {
-    console.log(this.displayName)
+    // console.log(this.displayName)
   }
 }
 </script>

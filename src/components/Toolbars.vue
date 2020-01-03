@@ -51,14 +51,11 @@ export default class Toolbars extends Vue {
     // a.click()
     // a.remove()
 
-    console.log(d3ToPng)
     d3ToPng('svg', 'name.png', {
       scale: 3,
       format: 'png',
       quality: 0.01,
       download: true
-    }).then((fileData: any) => {
-      console.log(fileData)
     })
   }
 }
